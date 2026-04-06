@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script>if(/Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)||window.innerWidth<=768){window.location.replace("mobile.html");}</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>서울대학교 차세대 네트워크망 구축 PMO 통합 종합상황판</title>
+<style>
+/* ========== RESET & BASE ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body {
+  font-family: 'Malgun Gothic', '맑은 고딕', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  background: #EEF1F6;
+  color: #1E293B;
+  min-width: 1920px;
+  min-height: 1080px;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== HEADER ========== */
+.header {
+  background: linear-gradient(135deg, #0F2B5B 0%, #1A3F7A 50%, #1E4D8C 100%);
+  padding: 18px 40px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 12px rgba(15,43,91,0.25);
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.header-logo {
+  width: 44px; height: 44px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 15px; color: #fff;
+  letter-spacing: -0.5px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.header-title {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.header-subtitle {
+  color: rgba(255,255,255,0.65);
+  font-size: 13px;
+  margin-top: 3px;
+  font-weight: 400;
+  letter-spacing: -0.2px;
+}
+.header-right {
+  display: flex; align-items: center; gap: 24px;
+  color: rgba(255,255,255,0.8);
+  font-size: 13px;
+}
+.header-badge {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.9);
+}
+.header-dot {
+  width: 8px; height: 8px;
+  background: #34D399;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ========== MAIN CONTAINER ========== */
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 70px - 40px);
+  padding: 16px 28px 24px;
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+/* ========== NAV TABS ========== */
+.nav-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 2px solid #E8ECF2;
+  margin-bottom: 16px;
+  background: #fff;
+  padding: 0 4px;
+}
+.nav-tab {
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #64748B;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+.nav-tab:hover {
+  color: #334155;
+}
+.nav-tab.active {
+  color: #2563EB;
+  border-bottom-color: #2563EB;
+}
+
+/* ========== CONTENT AREA ========== */
+.content-area {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.tab-content {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.tab-content.active {
+  display: flex;
+}
+
+/* Scrollbar styling */
+.tab-content::-webkit-scrollbar {
+  width: 8px;
+}
+.tab-content::-webkit-scrollbar-track {
+  background: #F1F5F9;
+  border-radius: 4px;
+}
+.tab-content::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+.tab-content::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* ========== KPI ROW ========== */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+.kpi-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px 16px 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  border: 1px solid #E8ECF2;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.kpi-card.blue::before { background: #2563EB; }
+.kpi-card.green::before { background: #059669; }
+.kpi-card.orange::before { background: #D97706; }
+.kpi-card.red::before { background: #DC2626; }
+.kpi-card.navy::before { background: #1E3A5F; }
+.kpi-card.teal::before { background: #0D9488; }
+.kpi-label {
+  font-size: 14px;
+  color: #64748B;
+  font-weight: 500;
+  margin-bottom: 8px;
+  letter-spacing: -0.2px;
+}
+.kpi-value {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.kpi-value.blue { color: #1E40AF; }
+.kpi-value.green { color: #047857; }
+.kpi-value.orange { color: #B45309; }
+.kpi-value.red { color: #B91C1C; }
+.kpi-value.navy { color: #1E3A5F; }
+.kpi-value.teal { color: #0F766E; }
+.kpi-sub {
+  font-size: 13px;
+  margin-top: 6px;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.kpi-sub .up { color: #059669; font-weight: 600; }
+.kpi-sub .down { color: #DC2626; font-weight: 600; }
+.kpi-sub .neutral { color: #D97706; font-weight: 600; }
+
+/* ========== PANEL ========== */
+.panel {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px 22px 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  border: 1px solid #E8ECF2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0F2B5B;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
+}
+.panel-title .icon {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.panel-title .icon.blue { background: #DBEAFE; color: #2563EB; }
+.panel-title .icon.green { background: #D1FAE5; color: #059669; }
+.panel-title .icon.orange { background: #FEF3C7; color: #D97706; }
+.panel-title .icon.red { background: #FEE2E2; color: #DC2626; }
+.panel-title .icon.navy { background: #E0E7F1; color: #1E3A5F; }
+.panel-title .icon.teal { background: #CCFBF1; color: #0D9488; }
+.panel-title .icon.purple { background: #EDE9FE; color: #7C3AED; }
+
+/* ========== 3개년 추진현황 ========== */
+.year-section { margin-bottom: 36px; }
+.year-section:last-child { margin-bottom: 0; }
+.year-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.year-badge {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  background: #1E3A5F;
+  border-radius: 5px;
+  padding: 3px 12px;
+  letter-spacing: -0.3px;
+}
+.year-badge.active { background: #2563EB; }
+.year-badge.future { background: #94A3B8; }
+.year-rate {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1E40AF;
+}
+.year-status {
+  font-size: 13px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.year-status.active { background: #DBEAFE; color: #1E40AF; }
+.year-status.plan { background: #F1F5F9; color: #64748B; }
+
+/* Timeline bar */
+.timeline-bar {
+  display: flex;
+  height: 32px;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  background: #F1F5F9;
+}
+.timeline-seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.2px;
+  position: relative;
+  transition: all 0.3s;
+}
+.timeline-seg.done { background: #2563EB; }
+.timeline-seg.progress { background: #3B82F6; }
+.timeline-seg.current { background: #60A5FA; border: 2px solid #1D4ED8; }
+.timeline-seg.planned { background: #CBD5E1; color: #64748B; }
+.timeline-seg.future { background: #E2E8F0; color: #94A3B8; }
+
+/* Area progress */
+.area-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 14px;
+  margin-top: 8px;
+}
+.area-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.area-label {
+  font-size: 13px;
+  color: #475569;
+  width: 110px;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+.area-bar-bg {
+  flex: 1;
+  height: 16px;
+  background: #F1F5F9;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.area-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  min-width: 32px;
+}
+.area-bar-fill.blue { background: linear-gradient(90deg, #3B82F6, #2563EB); }
+.area-bar-fill.teal { background: linear-gradient(90deg, #14B8A6, #0D9488); }
+.area-bar-fill.purple { background: linear-gradient(90deg, #8B5CF6, #7C3AED); }
+.area-bar-fill.amber { background: linear-gradient(90deg, #F59E0B, #D97706); }
+.area-bar-fill.green { background: linear-gradient(90deg, #34D399, #059669); }
+
+/* ========== 영역별 현황 ========== */
+.domain-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  flex: 1;
+  overflow-y: auto;
+}
+.domain-card {
+  border: 1px solid #E8ECF2;
+  border-radius: 8px;
+  padding: 16px;
+  background: #FAFBFD;
+}
+.domain-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.domain-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1E293B;
+  letter-spacing: -0.3px;
+}
+.domain-status-badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.domain-status-badge.normal { background: #D1FAE5; color: #047857; }
+.domain-status-badge.caution { background: #FEF3C7; color: #92400E; }
+.domain-status-badge.risk { background: #FEE2E2; color: #991B1B; }
+
+/* Donut */
+.donut-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.donut-wrap {
+  position: relative;
+  width: 64px; height: 64px;
+  flex-shrink: 0;
+}
+.donut-wrap svg { width: 64px; height: 64px; transform: rotate(-90deg); }
+.donut-wrap .donut-text {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  font-weight: 800;
+  color: #1E293B;
+}
+.donut-info {
+  font-size: 13px;
+  color: #64748B;
+  line-height: 1.7;
+}
+.donut-info strong { color: #1E293B; font-weight: 600; }
+
+.domain-details {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.domain-tag {
+  font-size: 12px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: #F1F5F9;
+  color: #475569;
+  font-weight: 500;
+}
+.domain-tag.issue { background: #FEF3C7; color: #92400E; }
+
+/* ========== 건물 전환 현황 ========== */
+.building-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 12px;
+  flex: 1;
+  overflow-y: auto;
+}
+.building-chart { }
+.status-bars { display: flex; flex-direction: column; gap: 8px; }
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.status-label {
+  font-size: 13px;
+  width: 68px;
+  flex-shrink: 0;
+  color: #475569;
+  font-weight: 500;
+  text-align: right;
+}
+.status-bar-bg {
+  flex: 1;
+  height: 28px;
+  background: #F1F5F9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.status-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  min-width: 48px;
+}
+.status-bar-fill.done { background: #2563EB; }
+.status-bar-fill.prog { background: #60A5FA; }
+.status-bar-fill.sched { background: #94A3B8; }
+.status-bar-fill.delay { background: #EF4444; }
+.status-bar-fill.stab { background: #10B981; }
+.status-count {
+  font-size: 13px;
+  color: #64748B;
+  width: 30px;
+  text-align: right;
+  font-weight: 600;
+}
+
+.campus-grid-wrap {
+  flex: 1;
+}
+.campus-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.campus-card {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+.campus-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1E293B;
+  margin-bottom: 4px;
+}
+.campus-stats {
+  font-size: 13px;
+  color: #64748B;
+  line-height: 1.6;
+}
+.campus-stats strong { color: #1E293B; }
+.campus-bar {
+  height: 6px;
+  background: #E2E8F0;
+  border-radius: 3px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.campus-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.highlight-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #E8ECF2;
+  flex-shrink: 0;
+}
+.highlight-item {
+  text-align: center;
+  padding: 12px 4px;
+  background: #F0F7FF;
+  border-radius: 6px;
+  border: 1px solid #DBEAFE;
+}
+.highlight-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1E40AF;
+}
+.highlight-label {
+  font-size: 11px;
+  color: #64748B;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+/* ========== 위험·이슈 ========== */
+.risk-summary {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+.risk-box {
+  flex: 1;
+  text-align: center;
+  padding: 14px 6px;
+  border-radius: 6px;
+  border: 1px solid;
+}
+.risk-box.high { background: #FEF2F2; border-color: #FECACA; }
+.risk-box.medium { background: #FFFBEB; border-color: #FDE68A; }
+.risk-box.low { background: #F0FDF4; border-color: #BBF7D0; }
+.risk-box-num {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+}
+.risk-box-num.high { color: #B91C1C; }
+.risk-box-num.medium { color: #92400E; }
+.risk-box-num.low { color: #166534; }
+.risk-box-label {
+  font-size: 12px;
+  color: #64748B;
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+.issue-list {
+  margin-bottom: 14px;
+  flex: 1;
+  overflow-y: auto;
+}
+.issue-list-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+  flex-shrink: 0;
+}
+.issue-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 6px 0;
+  border-bottom: 1px solid #F1F5F9;
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.5;
+}
+.issue-item:last-child { border-bottom: none; }
+.issue-num {
+  font-weight: 700;
+  color: #2563EB;
+  flex-shrink: 0;
+  min-width: 14px;
+}
+.issue-tag {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.issue-tag.high { background: #FEE2E2; color: #991B1B; }
+.issue-tag.mid { background: #FEF3C7; color: #92400E; }
+
+.change-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #E8ECF2;
+}
+.change-box {
+  text-align: center;
+  padding: 12px 4px;
+  background: #F8FAFC;
+  border-radius: 6px;
+  border: 1px solid #E8ECF2;
+}
+.change-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1E293B;
+}
+.change-label {
+  font-size: 11px;
+  color: #64748B;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+/* ========== 보고 지원 패널 ========== */
+.exec-section {
+  margin-bottom: 14px;
+}
+.exec-section:last-child { margin-bottom: 0; }
+.exec-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.exec-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 4px 0;
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.4;
+}
+.exec-bullet {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.exec-bullet.blue { background: #2563EB; }
+.exec-bullet.orange { background: #D97706; }
+.exec-bullet.green { background: #059669; }
+.exec-bullet.red { background: #DC2626; }
+
+.exec-decision {
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #78350F;
+}
+.exec-decision-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.report-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.report-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  background: #F8FAFC;
+  border: 1px solid #E8ECF2;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #334155;
+}
+.report-icon {
+  width: 22px; height: 22px;
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.report-icon.blue { background: #DBEAFE; color: #2563EB; }
+.report-icon.green { background: #D1FAE5; color: #059669; }
+.report-date {
+  font-size: 12px;
+  color: #94A3B8;
+  margin-left: auto;
+}
+
+.btn-row {
+  display: flex;
+  gap: 6px;
+}
+.btn-exec {
+  flex: 1;
+  padding: 8px 6px;
+  border-radius: 6px;
+  border: 1px solid #CBD5E1;
+  background: #fff;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-exec:hover { background: #F1F5F9; border-color: #94A3B8; }
+.btn-exec.primary {
+  background: #1E3A5F;
+  color: #fff;
+  border-color: #1E3A5F;
+}
+.btn-exec.primary:hover { background: #0F2B5B; }
+
+/* ========== FOOTER ========== */
+.footer {
+  text-align: center;
+  padding: 10px 40px;
+  color: #94A3B8;
+  font-size: 12px;
+  border-top: 1px solid #E2E8F0;
+  background: #fff;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+/* ========== 미니 범례 ========== */
+.legend {
+  display: flex;
+  gap: 14px;
+  margin-top: 4px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #64748B;
+}
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 2px;
+}
+
+/* ========== EXEC SUPPORT GRID ========== */
+.exec-support-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 20px;
+  flex: 1;
+  overflow-y: auto;
+}
+.exec-support-column {
+  display: flex;
+  flex-direction: column;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-logo">SNU<br>PMO</div>
+    <div>
+      <div class="header-title">서울대학교 차세대 네트워크망 구축 PMO 통합 종합상황판</div>
+      <div class="header-subtitle">3개년 통합 사업관리 기반의 일정·품질·위험·전환 현황 실시간 모니터링</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-badge">관리건물 : 240개동</div>
+    <div><span class="header-dot"></span>실시간 갱신</div>
+    <div>2026.04.03(목) 14:30 기준</div>
+  </div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div class="dashboard">
+
+  <!-- NAVIGATION TABS -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-tab="tab-1">추진현황</button>
+    <button class="nav-tab" data-tab="tab-2">영역별현황</button>
+    <button class="nav-tab" data-tab="tab-3">전환현황</button>
+    <button class="nav-tab" data-tab="tab-4">위험관리</button>
+    <button class="nav-tab" data-tab="tab-5">보고지원</button>
+  </div>
+
+  <!-- KPI CARDS (Always Visible) -->
+  <div class="kpi-row">
+    <div class="kpi-card blue">
+      <div class="kpi-label">전체 사업 진척률</div>
+      <div class="kpi-value blue">18.4<span style="font-size:22px;">%</span></div>
+      <div class="kpi-sub">계획 대비 <span class="up">▲ +0.8%p</span></div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">2026 연차 진척률</div>
+      <div class="kpi-value blue">32.5<span style="font-size:22px;">%</span></div>
+      <div class="kpi-sub">계획 35.0% 대비 <span class="down">▼ -2.5%p</span></div>
+    </div>
+    <div class="kpi-card navy">
+      <div class="kpi-label">관리 대상 건물 수</div>
+      <div class="kpi-value navy">240<span style="font-size:22px;">개동</span></div>
+      <div class="kpi-sub">캠퍼스 2개 권역</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">전환 완료 건물</div>
+      <div class="kpi-value green">38<span style="font-size:22px;">개동</span></div>
+      <div class="kpi-sub">전월 대비 <span class="up">▲ +12동</span></div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-label">금월 전환 예정</div>
+      <div class="kpi-value teal">15<span style="font-size:22px;">개동</span></div>
+      <div class="kpi-sub">야간작업 <strong style="color:#D97706;">4건</strong> 포함</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">미해결 이슈 건수</div>
+      <div class="kpi-value orange">23<span style="font-size:22px;">건</span></div>
+      <div class="kpi-sub">전주 대비 <span class="down">▲ +3건</span></div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">High 리스크 건수</div>
+      <div class="kpi-value red">5<span style="font-size:22px;">건</span></div>
+      <div class="kpi-sub">전주 대비 <span class="neutral">— 동일</span></div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">품질 점검 완료율</div>
+      <div class="kpi-value green">91.2<span style="font-size:22px;">%</span></div>
+      <div class="kpi-sub">누적 점검 <strong style="color:#334155;">347건</strong></div>
+    </div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <div class="content-area">
+
+    <!-- TAB 1: 추진현황 -->
+    <div id="tab-1" class="tab-content active">
+      <div class="panel">
+        <div class="panel-title">
+          <span class="icon blue">📊</span>
+          3개년 통합 추진현황
+          <span style="margin-left:auto;font-size:13px;color:#64748B;font-weight:400;">연차별·영역별 통합 관리</span>
+        </div>
+
+        <div style="flex:1;overflow-y:auto;padding-right:4px;">
+          <div class="year-section">
+            <div class="year-header">
+              <span class="year-badge active">2026</span>
+              <span class="year-rate">진척률 32.5%</span>
+              <span class="year-status active">구축 진행 중</span>
+            </div>
+            <div class="timeline-bar">
+              <div class="timeline-seg done" style="width:10%">계획</div>
+              <div class="timeline-seg done" style="width:12%">발주</div>
+              <div class="timeline-seg current" style="width:22%">구축</div>
+              <div class="timeline-seg planned" style="width:18%">시험</div>
+              <div class="timeline-seg planned" style="width:20%">전환</div>
+              <div class="timeline-seg future" style="width:18%">안정화</div>
+            </div>
+            <div class="area-grid">
+              <div class="area-item">
+                <span class="area-label">광케이블·환경공사</span>
+                <div class="area-bar-bg"><div class="area-bar-fill blue" style="width:42%">42%</div></div>
+              </div>
+              <div class="area-item">
+                <span class="area-label">유선 네트워크</span>
+                <div class="area-bar-bg"><div class="area-bar-fill teal" style="width:35%">35%</div></div>
+              </div>
+              <div class="area-item">
+                <span class="area-label">무선망 확대</span>
+                <div class="area-bar-bg"><div class="area-bar-fill purple" style="width:28%">28%</div></div>
+              </div>
+              <div class="area-item">
+                <span class="area-label">포털·운영관리</span>
+                <div class="area-bar-bg"><div class="area-bar-fill amber" style="width:22%">22%</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="year-section">
+            <div class="year-header">
+              <span class="year-badge">2027</span>
+              <span class="year-rate" style="color:#64748B;">진척률 8.2%</span>
+              <span class="year-status plan">선행 설계 중</span>
+            </div>
+            <div class="timeline-bar">
+              <div class="timeline-seg done" style="width:8%">계획</div>
+              <div class="timeline-seg progress" style="width:6%">설계</div>
+              <div class="timeline-seg planned" style="width:14%">발주</div>
+              <div class="timeline-seg planned" style="width:24%">구축</div>
+              <div class="timeline-seg planned" style="width:22%">전환</div>
+              <div class="timeline-seg future" style="width:26%">안정화</div>
+            </div>
+            <div class="area-grid">
+              <div class="area-item">
+                <span class="area-label">광케이블·환경공사</span>
+                <div class="area-bar-bg"><div class="area-bar-fill blue" style="width:12%">12%</div></div>
+              </div>
+              <div class="area-item">
+                <span class="area-label">유선 네트워크</span>
+                <div class="area-bar-bg"><div class="area-bar-fill teal" style="width:8%">8%</div></div>
+              </div>
+              <div class="area-item">
+                <span class="area-label">무선망 확대</span>
+                <div class="area-bar-bg"><div class="area-bar-fill purple" style="width:5%">5%</div></div>
+              </div>
+              <div class="area-item">
+                <span class="area-label">포털·운영관리</span>
+                <div class="area-bar-bg"><div class="area-bar-fill amber" style="width:6%">6%</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="year-section">
+            <div class="year-header">
+              <span class="year-badge future">2028</span>
+              <span class="year-rate" style="color:#94A3B8;">진척률 0%</span>
+              <span class="year-status plan">계획 수립 예정</span>
+            </div>
+            <div class="timeline-bar">
+              <div class="timeline-seg future" style="width:12%">계획</div>
+              <div class="timeline-seg future" style="width:14%">발주</div>
+              <div class="timeline-seg future" style="width:26%">구축</div>
+              <div class="timeline-seg future" style="width:22%">전환</div>
+              <div class="timeline-seg future" style="width:26%">안정화</div>
+            </div>
+          </div>
+
+          <div class="legend" style="margin-top:10px;">
+            <div class="legend-item"><div class="legend-dot" style="background:#2563EB;"></div>완료</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#3B82F6;"></div>진행중</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#60A5FA;border:2px solid #1D4ED8;width:10px;height:10px;"></div>현재</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#CBD5E1;"></div>예정</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#E2E8F0;"></div>미착수</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: 영역별현황 -->
+    <div id="tab-2" class="tab-content">
+      <div class="panel">
+        <div class="panel-title">
+          <span class="icon teal">🔗</span>
+          사업 영역별 진척현황
+          <span style="margin-left:auto;font-size:13px;color:#64748B;font-weight:400;">분리발주 4대 영역 통합 관리</span>
+        </div>
+
+        <div class="domain-grid">
+          <div class="domain-card">
+            <div class="domain-card-header">
+              <div class="domain-name">광케이블 및 환경공사</div>
+              <div class="domain-status-badge normal">정상</div>
+            </div>
+            <div class="donut-container">
+              <div class="donut-wrap">
+                <svg viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" stroke-width="4"/>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#2563EB" stroke-width="4" stroke-dasharray="42 88" stroke-linecap="round"/>
+                </svg>
+                <span class="donut-text">42%</span>
+              </div>
+              <div class="donut-info">
+                관리건물 <strong>240동</strong><br>
+                착공 <strong>168동</strong> · 완료 <strong>52동</strong><br>
+                이슈 <strong>4건</strong>
+              </div>
+            </div>
+            <div class="domain-details">
+              <span class="domain-tag">광포설 진행중</span>
+              <span class="domain-tag">MDF 공사 62%</span>
+            </div>
+          </div>
+
+          <div class="domain-card">
+            <div class="domain-card-header">
+              <div class="domain-name">유선 네트워크 구축</div>
+              <div class="domain-status-badge caution">주의</div>
+            </div>
+            <div class="donut-container">
+              <div class="donut-wrap">
+                <svg viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" stroke-width="4"/>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#D97706" stroke-width="4" stroke-dasharray="35 88" stroke-linecap="round"/>
+                </svg>
+                <span class="donut-text">35%</span>
+              </div>
+              <div class="donut-info">
+                스위치 입고 <strong>78%</strong><br>
+                설치완료 <strong>84동</strong><br>
+                이슈 <strong>7건</strong>
+              </div>
+            </div>
+            <div class="domain-details">
+              <span class="domain-tag issue">납품 일정 조정</span>
+              <span class="domain-tag">설정 자동화 85%</span>
+            </div>
+          </div>
+
+          <div class="domain-card">
+            <div class="domain-card-header">
+              <div class="domain-name">무선망 확대</div>
+              <div class="domain-status-badge caution">주의</div>
+            </div>
+            <div class="donut-container">
+              <div class="donut-wrap">
+                <svg viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" stroke-width="4"/>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#7C3AED" stroke-width="4" stroke-dasharray="28 88" stroke-linecap="round"/>
+                </svg>
+                <span class="donut-text">28%</span>
+              </div>
+              <div class="donut-info">
+                AP설치 <strong>67동</strong> 완료<br>
+                전파환경 측정 <strong>진행중</strong><br>
+                이슈 <strong>6건</strong>
+              </div>
+            </div>
+            <div class="domain-details">
+              <span class="domain-tag issue">AP 납품 지연</span>
+              <span class="domain-tag">커버리지 시험 40%</span>
+            </div>
+          </div>
+
+          <div class="domain-card">
+            <div class="domain-card-header">
+              <div class="domain-name">셀프서비스 포털·운영관리</div>
+              <div class="domain-status-badge normal">정상</div>
+            </div>
+            <div class="donut-container">
+              <div class="donut-wrap">
+                <svg viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" stroke-width="4"/>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#059669" stroke-width="4" stroke-dasharray="22 88" stroke-linecap="round"/>
+                </svg>
+                <span class="donut-text">22%</span>
+              </div>
+              <div class="donut-info">
+                요구사항 정의 <strong>완료</strong><br>
+                UI 설계 <strong>진행중</strong><br>
+                이슈 <strong>3건</strong>
+              </div>
+            </div>
+            <div class="domain-details">
+              <span class="domain-tag">API 연동 설계중</span>
+              <span class="domain-tag">NMS 연계 협의</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: 전환현황 -->
+    <div id="tab-3" class="tab-content">
+      <div class="panel">
+        <div class="panel-title">
+          <span class="icon green">🏢</span>
+          건물 전환 현황 요약
+          <span style="margin-left:auto;font-size:13px;color:#64748B;font-weight:400;">전체 240개동 기준</span>
+        </div>
+
+        <div class="building-summary">
+          <div class="building-chart">
+            <div style="font-size:13px;font-weight:600;color:#334155;margin-bottom:6px;">상태별 분포</div>
+            <div class="status-bars">
+              <div class="status-row">
+                <span class="status-label">완료</span>
+                <div class="status-bar-bg"><div class="status-bar-fill done" style="width:15.8%">38동</div></div>
+                <span class="status-count">38</span>
+              </div>
+              <div class="status-row">
+                <span class="status-label">진행 중</span>
+                <div class="status-bar-bg"><div class="status-bar-fill prog" style="width:17.5%">42동</div></div>
+                <span class="status-count">42</span>
+              </div>
+              <div class="status-row">
+                <span class="status-label">예정</span>
+                <div class="status-bar-bg"><div class="status-bar-fill sched" style="width:56.7%">136동</div></div>
+                <span class="status-count">136</span>
+              </div>
+              <div class="status-row">
+                <span class="status-label">지연</span>
+                <div class="status-bar-bg"><div class="status-bar-fill delay" style="width:4.2%">10동</div></div>
+                <span class="status-count">10</span>
+              </div>
+              <div class="status-row">
+                <span class="status-label">안정화</span>
+                <div class="status-bar-bg"><div class="status-bar-fill stab" style="width:5.8%">14동</div></div>
+                <span class="status-count">14</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#334155;margin-bottom:6px;">캠퍼스·권역별 현황</div>
+            <div class="campus-grid">
+              <div class="campus-card">
+                <div class="campus-name">관악캠퍼스</div>
+                <div class="campus-stats">
+                  전체 <strong>186동</strong> · 완료 <strong>29동</strong><br>
+                  진행 <strong>33동</strong> · 지연 <strong>7동</strong>
+                </div>
+                <div class="campus-bar">
+                  <div class="campus-bar-fill" style="width:33.3%;background:linear-gradient(90deg,#2563EB,#60A5FA);"></div>
+                </div>
+              </div>
+              <div class="campus-card">
+                <div class="campus-name">연건캠퍼스</div>
+                <div class="campus-stats">
+                  전체 <strong>54동</strong> · 완료 <strong>9동</strong><br>
+                  진행 <strong>9동</strong> · 지연 <strong>3동</strong>
+                </div>
+                <div class="campus-bar">
+                  <div class="campus-bar-fill" style="width:33.3%;background:linear-gradient(90deg,#0D9488,#5EEAD4);"></div>
+                </div>
+              </div>
+              <div class="campus-card" style="border-left:3px solid #D97706;">
+                <div class="campus-name" style="color:#92400E;">전환 집중 구간</div>
+                <div class="campus-stats">
+                  4월 자연대·공대 권역<br>
+                  <strong>15동</strong> 집중 전환 예정
+                </div>
+              </div>
+              <div class="campus-card" style="border-left:3px solid #7C3AED;">
+                <div class="campus-name" style="color:#5B21B6;">야간작업 계획</div>
+                <div class="campus-stats">
+                  금월 야간작업 <strong>4건</strong><br>
+                  중앙도서관·행정관 포함
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="highlight-row">
+          <div class="highlight-item">
+            <div class="highlight-num">15</div>
+            <div class="highlight-label">금월 전환 예정</div>
+          </div>
+          <div class="highlight-item">
+            <div class="highlight-num">4</div>
+            <div class="highlight-label">야간작업 예정</div>
+          </div>
+          <div class="highlight-item">
+            <div class="highlight-num" style="color:#DC2626;">10</div>
+            <div class="highlight-label">지연 건물</div>
+          </div>
+          <div class="highlight-item">
+            <div class="highlight-num" style="color:#059669;">14</div>
+            <div class="highlight-label">안정화 모니터링</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: 위험관리 -->
+    <div id="tab-4" class="tab-content">
+      <div class="panel">
+        <div class="panel-title">
+          <span class="icon red">⚠</span>
+          위험·이슈·변경관리 현황
+        </div>
+
+        <div class="risk-summary">
+          <div class="risk-box high">
+            <div class="risk-box-num high">5</div>
+            <div class="risk-box-label">High 리스크</div>
+          </div>
+          <div class="risk-box medium">
+            <div class="risk-box-num medium">12</div>
+            <div class="risk-box-label">Medium</div>
+          </div>
+          <div class="risk-box low">
+            <div class="risk-box-num low">8</div>
+            <div class="risk-box-label">Low</div>
+          </div>
+        </div>
+
+        <div class="issue-list">
+          <div class="issue-list-title">주요 이슈 Top 5</div>
+          <div class="issue-item">
+            <span class="issue-num">1</span>
+            <span class="issue-tag high">High</span>
+            자연대 권역 전환 일정 3일 지연 — 공사 협의 지연
+          </div>
+          <div class="issue-item">
+            <span class="issue-num">2</span>
+            <span class="issue-tag high">High</span>
+            AP 납품 일정 일부 조정 필요 — 공급사 재고 부족
+          </div>
+          <div class="issue-item">
+            <span class="issue-num">3</span>
+            <span class="issue-tag mid">Mid</span>
+            야간 전환 인력 운영방안 재검토 — 안전관리 기준 강화
+          </div>
+          <div class="issue-item">
+            <span class="issue-num">4</span>
+            <span class="issue-tag mid">Mid</span>
+            포털 연계 시험 보완 요청 — NMS 인터페이스 규격 변경
+          </div>
+          <div class="issue-item">
+            <span class="issue-num">5</span>
+            <span class="issue-tag mid">Mid</span>
+            광포설 구간 협의 일정 지연 — 시설관리 부서 일정 조율
+          </div>
+        </div>
+
+        <div class="change-grid">
+          <div class="change-box">
+            <div class="change-num">14</div>
+            <div class="change-label">변경요청<br>접수</div>
+          </div>
+          <div class="change-box">
+            <div class="change-num" style="color:#D97706;">3</div>
+            <div class="change-label">승인<br>대기</div>
+          </div>
+          <div class="change-box">
+            <div class="change-num" style="color:#DC2626;">4</div>
+            <div class="change-label">일정영향<br>발생</div>
+          </div>
+          <div class="change-box">
+            <div class="change-num" style="color:#7C3AED;">2</div>
+            <div class="change-label">품질영향<br>발생</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: 보고지원 -->
+    <div id="tab-5" class="tab-content">
+      <div class="panel">
+        <div class="panel-title">
+          <span class="icon purple">📋</span>
+          보고 및 의사결정 지원
+        </div>
+
+        <div class="exec-support-wrapper">
+          <div class="exec-support-column">
+            <div class="exec-section" style="margin-bottom:0;">
+              <div class="exec-section-title">📌 금주 주요 보고사항</div>
+              <div class="exec-item"><div class="exec-bullet blue"></div>관악캠퍼스 자연대 권역 1차 전환 완료 보고 (4.1)</div>
+              <div class="exec-item"><div class="exec-bullet blue"></div>2분기 통합 마스터 일정 수정안 검토 보고</div>
+              <div class="exec-item"><div class="exec-bullet blue"></div>무선망 AP 납품 현황 및 대응방안 공유</div>
+            </div>
+          </div>
+
+          <div class="exec-support-column">
+            <div class="exec-section" style="margin-bottom:0;">
+              <div class="exec-section-title">🔶 의사결정 필요 안건</div>
+              <div class="exec-decision">
+                <span class="exec-decision-icon">❶</span>
+                2분기 전환 우선순위 조정 검토
+              </div>
+              <div class="exec-decision">
+                <span class="exec-decision-icon">❷</span>
+                야간작업 운영 기준 승인 필요
+              </div>
+              <div class="exec-decision">
+                <span class="exec-decision-icon">❸</span>
+                포털 기능범위 1차 확정 필요
+              </div>
+            </div>
+          </div>
+
+          <div class="exec-support-column">
+            <div class="exec-section" style="margin-bottom:0;">
+              <div class="exec-section-title">📅 차주 주요 일정</div>
+              <div class="exec-item"><div class="exec-bullet green"></div>4/7(월) PMO 주간회의 · 전환현황 점검</div>
+              <div class="exec-item"><div class="exec-bullet orange"></div>4/8(화) 공대 권역 사전답사 · 전환 협의</div>
+              <div class="exec-item"><div class="exec-bullet green"></div>4/10(목) 월간 경영보고 · 품질점검 결과 보고</div>
+            </div>
+          </div>
+
+          <div class="exec-support-column">
+            <div style="font-size:14px;font-weight:700;color:#334155;margin-bottom:8px;">최근 보고서 현황</div>
+            <div class="report-item" style="margin-bottom:6px;">
+              <span class="report-icon blue">📄</span>
+              제14주차 주간보고서
+              <span class="report-date">04.01</span>
+            </div>
+            <div class="report-item" style="margin-bottom:6px;">
+              <span class="report-icon green">📊</span>
+              3월 월간보고서
+              <span class="report-date">03.31</span>
+            </div>
+            <div class="report-item" style="margin-bottom:10px;">
+              <span class="report-icon blue">📝</span>
+              AP납품 이슈보고서
+              <span class="report-date">03.28</span>
+            </div>
+            <div class="btn-row" style="margin-top:auto;">
+              <div class="btn-exec primary">보고서 다운로드</div>
+              <div class="btn-exec">리스크 브리핑</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  서울대학교 지능형 캠퍼스를 위한 차세대 네트워크망 구축 PMO 용역 · 통합 종합상황판 · PMO 사업관리시스템 v2.1 · 본 화면은 제안서 예시 화면입니다
+</div>
+
+<script>
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    const tabId = this.getAttribute('data-tab');
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.remove('active');
+    });
+    document.querySelectorAll('.nav-tab').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    document.getElementById(tabId).classList.add('active');
+    this.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>
