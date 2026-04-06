@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SNU 네트워크 PMO 대시보드 - 모바일</title>
+<style>
+/* ========== RESET & BASE ========== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-touch-callout: none;
+}
+
+body {
+  font-family: 'Malgun Gothic', '맑은 고딕', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  background: #EEF1F6;
+  color: #1E293B;
+  line-height: 1.4;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+body.menu-open {
+  overflow: hidden;
+}
+
+/* ========== HEADER ========== */
+.header {
+  background: linear-gradient(135deg, #0F2B5B 0%, #1A3F7A 50%, #1E4D8C 100%);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 12px rgba(15, 43, 91, 0.25);
+  position: sticky;
+  top: 0;
+  z-index: 1002;
+  min-height: 52px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.header-logo {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.header-title {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.header-subtitle {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 10px;
+  font-weight: 400;
+  display: none;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.header-badge {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+}
+
+.header-dot {
+  width: 6px;
+  height: 6px;
+  background: #34D399;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.hamburger-btn {
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  color: #fff;
+  font-size: 18px;
+  pointer-events: auto !important;
+  flex-shrink: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1003;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.hamburger-btn span {
+  width: 20px;
+  height: 2px;
+  background: #fff;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+}
+
+.hamburger-btn.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 7px);
+}
+
+.hamburger-btn.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -7px);
+}
+
+/* ========== NAVIGATION MENU ========== */
+.nav-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.nav-menu {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 280px;
+  background: #fff;
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  z-index: 1001;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  padding-top: 60px;
+}
+
+.nav-menu.active {
+  transform: translateX(0);
+}
+
+.nav-menu-item {
+  padding: 14px 16px;
+  border-bottom: 1px solid #E8ECF2;
+  color: #1E293B;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+
+.nav-menu-item:active {
+  background: #F1F5F9;
+}
+
+.nav-menu-item.active {
+  background: #DBEAFE;
+  color: #2563EB;
+  border-left: 4px solid #2563EB;
+  padding-left: 12px;
+}
+
+.nav-menu-item-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+/* ========== MAIN CONTAINER ========== */
+.dashboard {
+  padding: 12px 12px 80px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* ========== SECTION VISIBILITY ========== */
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+/* ========== KPI ROW - 2 PER ROW ========== */
+.kpi-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.kpi-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 12px 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #E8ECF2;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.kpi-card.blue::before { background: #2563EB; }
+.kpi-card.green::before { background: #059669; }
+.kpi-card.orange::before { background: #D97706; }
+.kpi-card.red::before { background: #DC2626; }
+.kpi-card.navy::before { background: #1E3A5F; }
+.kpi-card.teal::before { background: #0D9488; }
+
+.kpi-label {
+  font-size: 12px;
+  color: #64748B;
+  font-weight: 500;
+  margin-bottom: 6px;
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.kpi-value.blue { color: #1E40AF; }
+.kpi-value.green { color: #047857; }
+.kpi-value.orange { color: #B45309; }
+.kpi-value.red { color: #B91C1C; }
+.kpi-value.navy { color: #1E3A5F; }
+.kpi-value.teal { color: #0F766E; }
+
+.kpi-sub {
+  font-size: 10px;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.kpi-sub .up { color: #059669; font-weight: 600; }
+.kpi-sub .down { color: #DC2626; font-weight: 600; }
+.kpi-sub .neutral { color: #D97706; font-weight: 600; }
+
+/* ========== ACCORDION PANELS ========== */
+.panel {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #E8ECF2;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 14px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  background: #F8FAFC;
+  border-bottom: 1px solid #E8ECF2;
+  transition: background 0.2s;
+  min-height: 44px;
+}
+
+.panel-header:active {
+  background: #F1F5F9;
+}
+
+.panel-header.expanded {
+  background: #fff;
+  border-bottom-color: #E8ECF2;
+}
+
+.panel-header-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.panel-header-icon.blue { background: #DBEAFE; color: #2563EB; }
+.panel-header-icon.green { background: #D1FAE5; color: #059669; }
+.panel-header-icon.orange { background: #FEF3C7; color: #D97706; }
+.panel-header-icon.red { background: #FEE2E2; color: #DC2626; }
+.panel-header-icon.navy { background: #E0E7F1; color: #1E3A5F; }
+.panel-header-icon.teal { background: #CCFBF1; color: #0D9488; }
+
+.panel-header-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F2B5B;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-header-toggle {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #64748B;
+  font-size: 18px;
+  transition: transform 0.3s;
+}
+
+.panel-header.expanded .panel-header-toggle {
+  transform: rotate(180deg);
+}
+
+.panel-content {
+  padding: 12px;
+  display: none;
+  animation: slideDown 0.3s ease-out;
+}
+
+.panel-content.visible {
+  display: block;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== TIMELINE ========== */
+.year-section {
+  margin-bottom: 14px;
+}
+
+.year-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+.year-badge {
+  background: #DBEAFE;
+  color: #2563EB;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.year-badge.active {
+  background: #2563EB;
+  color: #fff;
+}
+
+.year-badge.future {
+  background: #E2E8F0;
+  color: #64748B;
+}
+
+.year-rate {
+  color: #64748B;
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.year-status {
+  background: #D1FAE5;
+  color: #047857;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.year-status.active {
+  background: #DCF4FE;
+  color: #1D7FB1;
+}
+
+.year-status.plan {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.timeline-bar {
+  display: flex;
+  height: 28px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  font-size: 9px;
+  font-weight: 500;
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 2px;
+  line-height: 1;
+  min-width: 20px;
+}
+
+.timeline-seg.done { background: #2563EB; }
+.timeline-seg.progress { background: #3B82F6; }
+.timeline-seg.current { background: #60A5FA; border: 2px solid #1D4ED8; }
+.timeline-seg.planned { background: #CBD5E1; color: #334155; }
+.timeline-seg.future { background: #E2E8F0; color: #64748B; }
+
+/* ========== AREA PROGRESS BARS ========== */
+.area-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.area-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.area-label {
+  font-size: 12px;
+  color: #64748B;
+  font-weight: 500;
+}
+
+.area-bar-bg {
+  background: #E2E8F0;
+  border-radius: 4px;
+  height: 18px;
+  overflow: hidden;
+}
+
+.area-bar-fill {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  padding-right: 4px;
+  border-radius: 4px;
+}
+
+.area-bar-fill.blue { background: #2563EB; }
+.area-bar-fill.teal { background: #0D9488; }
+.area-bar-fill.purple { background: #7C3AED; }
+.area-bar-fill.amber { background: #D97706; }
+
+/* ========== DOMAIN CARDS ========== */
+.domain-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.domain-card {
+  border: 1px solid #E8ECF2;
+  border-radius: 8px;
+  padding: 12px;
+  background: #F8FAFC;
+}
+
+.domain-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.domain-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0F2B5B;
+  flex: 1;
+}
+
+.domain-status-badge {
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.domain-status-badge.normal {
+  background: #D1FAE5;
+  color: #047857;
+}
+
+.domain-status-badge.caution {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.donut-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.donut-wrap {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.donut-wrap svg {
+  width: 100%;
+  height: 100%;
+}
+
+.donut-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  font-weight: 700;
+  color: #1E293B;
+}
+
+.donut-info {
+  font-size: 11px;
+  color: #64748B;
+  line-height: 1.4;
+}
+
+.donut-info strong {
+  color: #1E293B;
+  font-weight: 600;
+}
+
+.domain-details {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.domain-tag {
+  background: #fff;
+  border: 1px solid #CBD5E1;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  color: #64748B;
+}
+
+/* ========== CAMPUS GRID ========== */
+.campus-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.campus-card {
+  border-left: 3px solid #2563EB;
+  padding: 10px 12px;
+  background: #F8FAFC;
+  border-radius: 0 4px 4px 0;
+}
+
+.campus-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0F2B5B;
+  margin-bottom: 6px;
+}
+
+.campus-stats {
+  font-size: 11px;
+  color: #64748B;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.campus-stats strong {
+  color: #1E293B;
+  font-weight: 600;
+}
+
+.campus-bar {
+  background: #E2E8F0;
+  border-radius: 2px;
+  height: 14px;
+  overflow: hidden;
+}
+
+.campus-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+/* ========== HIGHLIGHT ROW ========== */
+.highlight-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.highlight-item {
+  background: #F8FAFC;
+  border: 1px solid #E8ECF2;
+  border-radius: 6px;
+  padding: 10px;
+  text-align: center;
+}
+
+.highlight-num {
+  font-size: 20px;
+  font-weight: 800;
+  color: #2563EB;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.highlight-label {
+  font-size: 11px;
+  color: #64748B;
+  font-weight: 500;
+}
+
+/* ========== RISK MANAGEMENT ========== */
+.risk-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.risk-box {
+  border-radius: 6px;
+  padding: 12px 8px;
+  text-align: center;
+}
+
+.risk-box.high {
+  background: #FEE2E2;
+  border: 1px solid #FECACA;
+}
+
+.risk-box.medium {
+  background: #FEF3C7;
+  border: 1px solid #FCD34D;
+}
+
+.risk-box.low {
+  background: #D1FAE5;
+  border: 1px solid #6EE7B7;
+}
+
+.risk-box-num {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.risk-box-num.high { color: #DC2626; }
+.risk-box-num.medium { color: #D97706; }
+.risk-box-num.low { color: #059669; }
+
+.risk-box-label {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.risk-box.high .risk-box-label { color: #991B1B; }
+.risk-box.medium .risk-box-label { color: #92400E; }
+.risk-box.low .risk-box-label { color: #065F46; }
+
+/* ========== ISSUE LIST ========== */
+.issue-list {
+  margin-top: 12px;
+}
+
+.issue-list-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0F2B5B;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #E8ECF2;
+}
+
+.issue-item {
+  display: flex;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #E8ECF2;
+  font-size: 12px;
+  line-height: 1.3;
+  align-items: flex-start;
+}
+
+.issue-item:last-child {
+  border-bottom: none;
+}
+
+.issue-num {
+  background: #F1F5F9;
+  color: #64748B;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.issue-tag {
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-size: 9px;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-right: 4px;
+}
+
+.issue-tag.high {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.issue-tag.mid {
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+/* ========== CHANGE MANAGEMENT ========== */
+.change-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.change-box {
+  background: #F8FAFC;
+  border: 1px solid #E8ECF2;
+  border-radius: 6px;
+  padding: 10px;
+  text-align: center;
+}
+
+.change-box.high {
+  border-color: #FCA5A5;
+  background: #FEF2F2;
+}
+
+.change-box.medium {
+  border-color: #FCD34D;
+  background: #FFFBEB;
+}
+
+.change-box.low {
+  border-color: #6EE7B7;
+  background: #F0FDF4;
+}
+
+.change-num {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.change-num.high { color: #DC2626; }
+.change-num.medium { color: #D97706; }
+.change-num.low { color: #059669; }
+
+.change-label {
+  font-size: 11px;
+  color: #64748B;
+  font-weight: 500;
+}
+
+/* ========== REPORT SECTION ========== */
+.report-item {
+  background: #F8FAFC;
+  border: 1px solid #E8ECF2;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.report-item-date {
+  color: #64748B;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.report-item-title {
+  color: #0F2B5B;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.report-item-desc {
+  color: #64748B;
+  font-size: 11px;
+}
+
+/* ========== FOOTER ========== */
+.footer {
+  padding: 12px;
+  text-align: center;
+  font-size: 10px;
+  color: #94A3B8;
+  border-top: 1px solid #E8ECF2;
+  background: #fff;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 98;
+}
+
+.update-time {
+  font-weight: 500;
+  color: #64748B;
+}
+
+/* ========== BUTTONS ========== */
+.btn-exec {
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  color: #64748B;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-block;
+  transition: all 0.2s;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.btn-exec:active {
+  background: #E2E8F0;
+}
+
+.btn-exec.primary {
+  background: #2563EB;
+  border-color: #2563EB;
+  color: #fff;
+}
+
+.btn-exec.primary:active {
+  background: #1D4ED8;
+}
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.legend {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #E8ECF2;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #64748B;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ========== RESPONSIVE UTILITIES ========== */
+@media (max-width: 430px) {
+  .header-badge {
+    display: none;
+  }
+
+  .header-title {
+    font-size: 13px;
+  }
+}
+
+@media (max-height: 600px) {
+  .dashboard {
+    padding-bottom: 100px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-logo">SNU</div>
+    <div>
+      <div class="header-title">SNU PMO</div>
+      <div class="header-subtitle">네트워크 대시보드</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="header-badge"><span class="header-dot"></span>실시간</span>
+    <button type="button" class="hamburger-btn" id="menuBtn" ontouchend="handleMenuTap(event)" onclick="handleMenuTap(event)">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</div>
+
+<!-- NAVIGATION OVERLAY -->
+<div class="nav-overlay" id="navOverlay" onclick="closeMobileMenu()"></div>
+
+<!-- NAVIGATION MENU -->
+<nav class="nav-menu" id="navMenu">
+  <div class="nav-menu-item active" onclick="goToSection('overview', this)">
+    <span class="nav-menu-item-icon">📊</span>
+    <span>종합현황</span>
+  </div>
+  <div class="nav-menu-item" onclick="goToSection('execution', this)">
+    <span class="nav-menu-item-icon">📈</span>
+    <span>추진현황</span>
+  </div>
+  <div class="nav-menu-item" onclick="goToSection('domain', this)">
+    <span class="nav-menu-item-icon">🔗</span>
+    <span>영역별현황</span>
+  </div>
+  <div class="nav-menu-item" onclick="goToSection('transition', this)">
+    <span class="nav-menu-item-icon">🏢</span>
+    <span>전환현황</span>
+  </div>
+  <div class="nav-menu-item" onclick="goToSection('risk', this)">
+    <span class="nav-menu-item-icon">⚠️</span>
+    <span>위험관리</span>
+  </div>
+  <div class="nav-menu-item" onclick="goToSection('reports', this)">
+    <span class="nav-menu-item-icon">📋</span>
+    <span>보고지원</span>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="dashboard">
+
+  <!-- ===== SECTION 1: 종합현황 (Overview) ===== -->
+  <div class="section active" id="section-overview">
+
+    <!-- KPI CARDS - 2x4 Grid -->
+    <div class="kpi-row">
+      <div class="kpi-card blue">
+        <div class="kpi-label">전체 사업 진척률</div>
+        <div class="kpi-value blue">18.4<span style="font-size:16px;">%</span></div>
+        <div class="kpi-sub">계획 대비 <span class="up">▲ +0.8%p</span></div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label">2026 연차 진척률</div>
+        <div class="kpi-value blue">32.5<span style="font-size:16px;">%</span></div>
+        <div class="kpi-sub">계획 35.0% 대비 <span class="down">▼ -2.5%p</span></div>
+      </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card navy">
+        <div class="kpi-label">관리 대상 건물</div>
+        <div class="kpi-value navy">240<span style="font-size:16px;">개동</span></div>
+        <div class="kpi-sub">캠퍼스 2개 권역</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">전환 완료 건물</div>
+        <div class="kpi-value green">38<span style="font-size:16px;">개동</span></div>
+        <div class="kpi-sub">전월 대비 <span class="up">▲ +12동</span></div>
+      </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card teal">
+        <div class="kpi-label">금월 전환 예정</div>
+        <div class="kpi-value teal">15<span style="font-size:16px;">개동</span></div>
+        <div class="kpi-sub">야간작업 <strong style="color:#D97706;">4건</strong></div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-label">미해결 이슈 건수</div>
+        <div class="kpi-value orange">23<span style="font-size:16px;">건</span></div>
+        <div class="kpi-sub">전주 대비 <span class="down">▲ +3건</span></div>
+      </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card red">
+        <div class="kpi-label">High 리스크 건수</div>
+        <div class="kpi-value red">5<span style="font-size:16px;">건</span></div>
+        <div class="kpi-sub">전주 대비 <span class="neutral">— 동일</span></div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">품질 점검 완료율</div>
+        <div class="kpi-value green">91.2<span style="font-size:16px;">%</span></div>
+        <div class="kpi-sub">누적 점검 <strong style="color:#334155;">347건</strong></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== SECTION 2: 추진현황 (Execution Status) ===== -->
+  <div class="section" id="section-execution">
+
+    <div class="panel">
+      <div class="panel-header expanded" onclick="togglePanel(this)">
+        <div class="panel-header-icon blue">📊</div>
+        <div class="panel-header-title">3개년 통합 추진현황</div>
+        <div class="panel-header-toggle">⌄</div>
+      </div>
+      <div class="panel-content visible">
+
+        <!-- 2026년 -->
+        <div class="year-section">
+          <div class="year-header">
+            <span class="year-badge active">2026</span>
+            <span class="year-rate">진척률 32.5%</span>
+            <span class="year-status active">구축 진행 중</span>
+          </div>
+          <div class="timeline-bar">
+            <div class="timeline-seg done" style="width:10%">계획</div>
+            <div class="timeline-seg done" style="width:12%">발주</div>
+            <div class="timeline-seg current" style="width:22%">구축</div>
+            <div class="timeline-seg planned" style="width:18%">시험</div>
+            <div class="timeline-seg planned" style="width:20%">전환</div>
+            <div class="timeline-seg future" style="width:18%">안정화</div>
+          </div>
+          <div class="area-grid">
+            <div class="area-item">
+              <span class="area-label">광케이블·환경공사</span>
+              <div class="area-bar-bg"><div class="area-bar-fill blue" style="width:42%">42%</div></div>
+            </div>
+            <div class="area-item">
+              <span class="area-label">유선 네트워크</span>
+              <div class="area-bar-bg"><div class="area-bar-fill teal" style="width:35%">35%</div></div>
+            </div>
+            <div class="area-item">
+              <span class="area-label">무선망 확대</span>
+              <div class="area-bar-bg"><div class="area-bar-fill purple" style="width:28%">28%</div></div>
+            </div>
+            <div class="area-item">
+              <span class="area-label">포털·운영관리</span>
+              <div class="area-bar-bg"><div class="area-bar-fill amber" style="width:22%">22%</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2027년 -->
+        <div class="year-section">
+          <div class="year-header">
+            <span class="year-badge">2027</span>
+            <span class="year-rate" style="color:#64748B;">진척률 8.2%</span>
+            <span class="year-status plan">선행 설계 중</span>
+          </div>
+          <div class="timeline-bar">
+            <div class="timeline-seg done" style="width:8%">계획</div>
+            <div class="timeline-seg progress" style="width:6%">설계</div>
+            <div class="timeline-seg planned" style="width:14%">발주</div>
+            <div class="timeline-seg planned" style="width:24%">구축</div>
+            <div class="timeline-seg planned" style="width:22%">전환</div>
+            <div class="timeline-seg future" style="width:26%">안정화</div>
+          </div>
+          <div class="area-grid">
+            <div class="area-item">
+              <span class="area-label">광케이블·환경공사</span>
+              <div class="area-bar-bg"><div class="area-bar-fill blue" style="width:12%">12%</div></div>
+            </div>
+            <div class="area-item">
+              <span class="area-label">유선 네트워크</span>
+              <div class="area-bar-bg"><div class="area-bar-fill teal" style="width:8%">8%</div></div>
+            </div>
+            <div class="area-item">
+              <span class="area-label">무선망 확대</span>
+              <div class="area-bar-bg"><div class="area-bar-fill purple" style="width:5%">5%</div></div>
+            </div>
+            <div class="area-item">
+              <span class="area-label">포털·운영관리</span>
+              <div class="area-bar-bg"><div class="area-bar-fill amber" style="width:6%">6%</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2028년 -->
+        <div class="year-section">
+          <div class="year-header">
+            <span class="year-badge future">2028</span>
+            <span class="year-rate" style="color:#94A3B8;">진척률 0%</span>
+            <span class="year-status plan">계획 수립 예정</span>
+          </div>
+          <div class="timeline-bar">
+            <div class="timeline-seg future" style="width:12%">계획</div>
+            <div class="timeline-seg future" style="width:14%">발주</div>
+            <div class="timeline-seg future" style="width:26%">구축</div>
+            <div class="timeline-seg future" style="width:22%">전환</div>
+            <div class="timeline-seg future" style="width:26%">안정화</div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#2563EB;"></div>완료</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#3B82F6;"></div>진행중</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#60A5FA;border:2px solid #1D4ED8;width:10px;height:10px;"></div>현재</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#CBD5E1;"></div>예정</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#E2E8F0;"></div>미착수</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== SECTION 3: 영역별현황 (Domain Status) ===== -->
+  <div class="section" id="section-domain">
+
+    <div class="panel">
+      <div class="panel-header expanded" onclick="togglePanel(this)">
+        <div class="panel-header-icon teal">🔗</div>
+        <div class="panel-header-title">사업 영역별 진척현황</div>
+        <div class="panel-header-toggle">⌄</div>
+      </div>
+      <div class="panel-content visible">
+
+        <div class="domain-grid">
+          <!-- 공사 -->
+          <div class="domain-card">
+            <div class="domain-card-header">
+              <div class="domain-name">광케이블 및 환경공사</div>
+              <div class="domain-status-badge normal">정상</div>
+            </div>
+            <div class="donut-container">
+              <div class="donut-wrap">
+                <svg viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" stroke-width="4"/>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#2563EB" stroke-width="4" stroke-dasharray="42 88" stroke-linecap="round"/>
+                </svg>
+                <span class="donut-text">42%</span>
+              </div>
+              <div class="donut-info">
+                관리건물 <strong>240동</strong><br>
+                착공 <strong>168동</strong> · 완료 <strong>52동</strong><br>
+                이슈 <strong>4건</strong>
+              </div>
+            </div>
+            <div class="domain-details">
+              <span class="domain-tag">광포설 진행중</span>
+              <span class="domain-tag">MDF 공사 62%</span>
+            </div>
+          </div>
+
+          <!-- 유선 -->
+          <div class="domain-card">
+            <div class="domain-card-header">
+              <div class="domain-name">유선 네트워크 구축</div>
+              <div class="domain-status-badge normal">정상</div>
+            </div>
+            <div class="donut-container">
+              <div class="donut-wrap">
+                <svg viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" stroke-width="4"/>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#0D9488" stroke-width="4" stroke-dasharray="35 88" stroke-linecap="round"/>
+                </svg>
+                <span class="donut-text">35%</span>
+              </div>
+              <div class="donut-info">
+                L3 스위치 <strong>224개</strong><br>
+                설치 <strong>156개</strong> · 시험 <strong>68개</strong><br>
+                이슈 <strong>2건</strong>
+              </div>
+            </div>
+            <div class="domain-details">
+              <span class="domain-tag">설치 진행 72%</span>
+              <span class="domain-tag">시험 대기 28%</span>
+            </div>
+          </div>
+
+          <!-- 무선 -->
+          <div class="domain-card">
+            <div class="domain-card-header">
+              <div class="domain-name">무선망 확대 구축</div>
+              <div class="domain-status-badge normal">정상</div>
+            </div>
+            <div class="donut-container">
+              <div class="donut-wrap">
+                <svg viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" stroke-width="4"/>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#7C3AED" stroke-width="4" stroke-dasharray="28 88" stroke-linecap="round"/>
+                </svg>
+                <span class="donut-text">28%</span>
+              </div>
+              <div class="donut-info">
+                설치예정 <strong>480개</strong><br>
+                완료 <strong>134개</strong> · 진행 <strong>98개</strong><br>
+                이슈 <strong>3건</strong>
+              </div>
+            </div>
+            <div class="domain-details">
+              <span class="domain-tag">실내 AP 설치 진행</span>
+              <span class="domain-tag">옥외 선로 공사 진행</span>
+            </div>
+          </div>
+
+          <!-- 포털 -->
+          <div class="domain-card">
+            <div class="domain-card-header">
+              <div class="domain-name">포털·운영관리 시스템</div>
+              <div class="domain-status-badge caution">주의</div>
+            </div>
+            <div class="donut-container">
+              <div class="donut-wrap">
+                <svg viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" stroke-width="4"/>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#D97706" stroke-width="4" stroke-dasharray="22 88" stroke-linecap="round"/>
+                </svg>
+                <span class="donut-text">22%</span>
+              </div>
+              <div class="donut-info">
+                포털 개발 <strong>82%</strong><br>
+                시험 환경 구성 진행 중<br>
+                이슈 <strong>6건</strong>
+              </div>
+            </div>
+            <div class="domain-details">
+              <span class="domain-tag">개발 진행중 82%</span>
+              <span class="domain-tag">인터페이스 규격 변경</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== SECTION 4: 전환현황 (Transition Status) ===== -->
+  <div class="section" id="section-transition">
+
+    <div class="panel">
+      <div class="panel-header expanded" onclick="togglePanel(this)">
+        <div class="panel-header-icon orange">🏢</div>
+        <div class="panel-header-title">캠퍼스별 전환현황</div>
+        <div class="panel-header-toggle">⌄</div>
+      </div>
+      <div class="panel-content visible">
+
+        <div class="campus-grid">
+          <div class="campus-card">
+            <div class="campus-name">관악캠퍼스</div>
+            <div class="campus-stats">
+              전체 <strong>186동</strong> · 완료 <strong>29동</strong><br>
+              진행 <strong>18동</strong> · 지연 <strong>7동</strong>
+            </div>
+            <div class="campus-bar">
+              <div class="campus-bar-fill" style="width:33.3%;background:linear-gradient(90deg,#2563EB,#60A5FA);"></div>
+            </div>
+          </div>
+          <div class="campus-card">
+            <div class="campus-name">연건캠퍼스</div>
+            <div class="campus-stats">
+              전체 <strong>54동</strong> · 완료 <strong>9동</strong><br>
+              진행 <strong>9동</strong> · 지연 <strong>3동</strong>
+            </div>
+            <div class="campus-bar">
+              <div class="campus-bar-fill" style="width:33.3%;background:linear-gradient(90deg,#0D9488,#5EEAD4);"></div>
+            </div>
+          </div>
+          <div class="campus-card" style="border-left:3px solid #D97706;">
+            <div class="campus-name" style="color:#92400E;">전환 집중 구간</div>
+            <div class="campus-stats">
+              4월 자연대·공대 권역<br>
+              <strong>15동</strong> 집중 전환 예정
+            </div>
+          </div>
+          <div class="campus-card" style="border-left:3px solid #7C3AED;">
+            <div class="campus-name" style="color:#5B21B6;">야간작업 계획</div>
+            <div class="campus-stats">
+              금월 야간작업 <strong>4건</strong><br>
+              중앙도서관·행정관 포함
+            </div>
+          </div>
+        </div>
+
+        <div class="highlight-row">
+          <div class="highlight-item">
+            <div class="highlight-num">15</div>
+            <div class="highlight-label">금월 전환 예정</div>
+          </div>
+          <div class="highlight-item">
+            <div class="highlight-num">4</div>
+            <div class="highlight-label">야간작업 예정</div>
+          </div>
+          <div class="highlight-item">
+            <div class="highlight-num" style="color:#DC2626;">10</div>
+            <div class="highlight-label">지연 건물</div>
+          </div>
+          <div class="highlight-item">
+            <div class="highlight-num" style="color:#059669;">14</div>
+            <div class="highlight-label">안정화 모니터링</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== SECTION 5: 위험관리 (Risk Management) ===== -->
+  <div class="section" id="section-risk">
+
+    <div class="panel">
+      <div class="panel-header expanded" onclick="togglePanel(this)">
+        <div class="panel-header-icon red">⚠️</div>
+        <div class="panel-header-title">위험·이슈·변경관리</div>
+        <div class="panel-header-toggle">⌄</div>
+      </div>
+      <div class="panel-content visible">
+
+        <div class="risk-summary">
+          <div class="risk-box high">
+            <div class="risk-box-num high">5</div>
+            <div class="risk-box-label">High 리스크</div>
+          </div>
+          <div class="risk-box medium">
+            <div class="risk-box-num medium">12</div>
+            <div class="risk-box-label">Medium</div>
+          </div>
+          <div class="risk-box low">
+            <div class="risk-box-num low">8</div>
+            <div class="risk-box-label">Low</div>
+          </div>
+        </div>
+
+        <div class="issue-list">
+          <div class="issue-list-title">주요 이슈 Top 5</div>
+          <div class="issue-item">
+            <span class="issue-num">1</span>
+            <span class="issue-tag high">High</span>
+            <span>자연대 권역 전환 일정 3일 지연 — 공사 협의 지연</span>
+          </div>
+          <div class="issue-item">
+            <span class="issue-num">2</span>
+            <span class="issue-tag high">High</span>
+            <span>AP 납품 일정 일부 조정 필요 — 공급사 재고 부족</span>
+          </div>
+          <div class="issue-item">
+            <span class="issue-num">3</span>
+            <span class="issue-tag mid">Mid</span>
+            <span>야간 전환 인력 운영방안 재검토 — 안전관리 기준 강화</span>
+          </div>
+          <div class="issue-item">
+            <span class="issue-num">4</span>
+            <span class="issue-tag mid">Mid</span>
+            <span>포털 연계 시험 보완 요청 — NMS 인터페이스 규격 변경</span>
+          </div>
+          <div class="issue-item">
+            <span class="issue-num">5</span>
+            <span class="issue-tag mid">Mid</span>
+            <span>광포설 구간 협의 일정 지연 — 시설관리 부서 일정 조율</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #E8ECF2;">
+          <div style="font-size: 12px; font-weight: 700; color: #0F2B5B; margin-bottom: 8px;">변경관리</div>
+          <div class="change-grid">
+            <div class="change-box high">
+              <div class="change-num high">7</div>
+              <div class="change-label">승인 대기</div>
+            </div>
+            <div class="change-box medium">
+              <div class="change-num medium">3</div>
+              <div class="change-label">승인됨</div>
+            </div>
+            <div class="change-box low">
+              <div class="change-num low">1</div>
+              <div class="change-label">반려</div>
+            </div>
+            <div class="change-box">
+              <div class="change-num" style="color: #059669;">12</div>
+              <div class="change-label">완료</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== SECTION 6: 보고지원 (Reports) ===== -->
+  <div class="section" id="section-reports">
+
+    <div class="panel">
+      <div class="panel-header expanded" onclick="togglePanel(this)">
+        <div class="panel-header-icon green">📋</div>
+        <div class="panel-header-title">보고 자료</div>
+        <div class="panel-header-toggle">⌄</div>
+      </div>
+      <div class="panel-content visible">
+
+        <div class="report-item">
+          <div class="report-item-date">2026.04.04</div>
+          <div class="report-item-title">주간 진척 현황 보고</div>
+          <div class="report-item-desc">전체 진척률 18.4%, 2026 연차 32.5% 진행 중. 주요 이슈 5건 관리 중.</div>
+        </div>
+
+        <div class="report-item">
+          <div class="report-item-date">2026.03.28</div>
+          <div class="report-item-title">월간 PMO 회의 의사록</div>
+          <div class="report-item-desc">영역별 진척 현황 검토 및 주요 위험 요소 논의. 미해결 이슈 23건</div>
+        </div>
+
+        <div class="report-item">
+          <div class="report-item-date">2026.03.22</div>
+          <div class="report-item-title">위험 관리 보고</div>
+          <div class="report-item-desc">High 리스크 5건, Medium 12건 현황. 안전관리 기준 강화 논의</div>
+        </div>
+
+        <div class="report-item">
+          <div class="report-item-date">2026.03.15</div>
+          <div class="report-item-title">2027년 예산 편성안</div>
+          <div class="report-item-desc">선행 설계 비용 및 2027년 구축비용 계획. 8.2% 진행률 목표</div>
+        </div>
+
+        <div class="report-item">
+          <div class="report-item-date">2026.03.08</div>
+          <div class="report-item-title">품질 점검 결과 보고</div>
+          <div class="report-item-desc">누적 점검 347건, 완료율 91.2%. 부적합 사항 재작업 진행</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="update-time">마지막 업데이트: 2026.04.05 14:30</div>
+  <div style="font-size: 9px; color: #94A3B8; margin-top: 4px;">모바일 최적화 버전 v1.0</div>
+</div>
+
+<script>
+var menuTapHandled = false;
+
+function handleMenuTap(e) {
+  if (e.type === 'touchend') {
+    e.preventDefault();
+    menuTapHandled = true;
+    toggleMobileMenu();
+  } else if (e.type === 'click') {
+    if (menuTapHandled) {
+      menuTapHandled = false;
+      return;
+    }
+    toggleMobileMenu();
+  }
+}
+
+function toggleMobileMenu() {
+  var btn = document.getElementById('menuBtn');
+  var menu = document.getElementById('navMenu');
+  var overlay = document.getElementById('navOverlay');
+  if (menu.classList.contains('active')) {
+    closeMobileMenu();
+  } else {
+    btn.classList.add('active');
+    menu.classList.add('active');
+    overlay.classList.add('active');
+    document.body.classList.add('menu-open');
+  }
+}
+
+function closeMobileMenu() {
+  document.getElementById('menuBtn').classList.remove('active');
+  document.getElementById('navMenu').classList.remove('active');
+  document.getElementById('navOverlay').classList.remove('active');
+  document.body.classList.remove('menu-open');
+}
+
+function goToSection(sectionId, el) {
+  // Update nav active
+  var items = document.querySelectorAll('.nav-menu-item');
+  for (var i = 0; i < items.length; i++) { items[i].classList.remove('active'); }
+  el.classList.add('active');
+
+  // Update section visibility
+  var sections = document.querySelectorAll('.section');
+  for (var i = 0; i < sections.length; i++) { sections[i].classList.remove('active'); }
+  var target = document.getElementById('section-' + sectionId);
+  if (target) { target.classList.add('active'); }
+
+  closeMobileMenu();
+  window.scrollTo(0, 0);
+}
+
+function togglePanel(header) {
+  header.classList.toggle('expanded');
+  var content = header.nextElementSibling;
+  if (content) { content.classList.toggle('visible'); }
+}
+</script>
+
+</body>
+</html>
