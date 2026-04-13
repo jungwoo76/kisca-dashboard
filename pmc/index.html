@@ -297,6 +297,14 @@ function showSub(s,el){
   if(target){target.className='sub-wrap show';}
 }
 
+function goToKey(idx){
+  var tab=document.querySelector('.nav-item[data-t="key"]');
+  if(tab) showTab('key',tab);
+  setTimeout(function(){
+    var row=document.getElementById('key-row-'+idx);
+    if(row){row.scrollIntoView({behavior:'smooth',block:'center'});row.style.background='#fef3c7';setTimeout(function(){row.style.background='';},2000);}
+  },100);
+}
 
 </script>
 <header><div class="hdr">
@@ -344,26 +352,25 @@ function showSub(s,el){
     </div>
   </div>
 
-  <div class="cd"><div class="cd-h"><h3>🏆 수주 실적</h3><span class="badge badge-g">3건 · 8.59억</span></div>
+  <div class="cd"><div class="cd-h"><h3>🏆 수주 실적</h3><span class="badge badge-g">3건 · 8.6억</span></div>
     <div class="sx"><table><thead><tr><th>발주기관</th><th>사업명</th><th>PM</th><th class="ar">수주액(억)</th><th>투찰율</th><th>수주 요인</th></tr></thead><tbody>
-      <tr><td class="tp">한국교육과정평가원</td><td>AI기반 학력진단시스템, 국가기초학력지원포털 구축 2차 PMO</td><td class="tp">최정문</td><td class="ar fw">5.12</td><td>80%</td><td style="max-width:260px;font-size:10.5px">1. 작년까지 제안서 장표 작성에 있어서 기존에 사용해왔던 도형이나 그림들을 유지하고 내용만 바꾸어서 제안하</td></tr>
-      <tr><td class="tp">식품의약품안전처</td><td>의약품 AI 심사 및 산업지원 체계 구축 PMO 용역</td><td class="tp">구경모</td><td class="ar fw">2.13</td><td>0.9995</td><td style="max-width:260px;font-size:10.5px">1. 사업의 주요 과업별, 수행전략별로 김용효 대표님이 AI를 활용하여 하나하나 상세하게 장표를 구성하였고 </td></tr>
-      <tr><td class="tp">성평등가족부​</td><td>아이돌봄사 국가자격 관리시스템 구축 PMO 사업</td><td class="tp">손진</td><td class="ar fw">1.34</td><td>80%</td><td style="max-width:260px;font-size:10.5px">1. 워킹데이 기준 5일간 준비하여 제출하는 촉박한 일정속에서도 김용효 대표님이 AI를 활용한 사업에 대한 </td></tr>
+      <tr><td class="tp">한국교육과정평가원</td><td>AI기반 학력진단시스템, 국가기초학력지원포털 구축 2차 PMO</td><td class="tp">최정문</td><td class="ar fw">5.1</td><td>80.0%</td><td style="max-width:260px;font-size:10.5px">1. 작년까지 제안서 장표 작성에 있어서 기존에 사용해왔던 도형이나 그림들을 유지하고 내용만 바꾸어서 제안하</td></tr>
+      <tr><td class="tp">식품의약품안전처</td><td>의약품 AI 심사 및 산업지원 체계 구축 PMO 용역</td><td class="tp">구경모</td><td class="ar fw">2.1</td><td>100.0%</td><td style="max-width:260px;font-size:10.5px">1. 사업의 주요 과업별, 수행전략별로 김용효 대표님이 AI를 활용하여 하나하나 상세하게 장표를 구성하였고 </td></tr>
+      <tr><td class="tp">성평등가족부​</td><td>아이돌봄사 국가자격 관리시스템 구축 PMO 사업</td><td class="tp">손진</td><td class="ar fw">1.3</td><td>80.0%</td><td style="max-width:260px;font-size:10.5px">1. 워킹데이 기준 5일간 준비하여 제출하는 촉박한 일정속에서도 김용효 대표님이 AI를 활용한 사업에 대한 </td></tr>
     </tbody></table></div>
   </div>
 
   <div class="cd"><div class="cd-h"><h3>🔥 주요 준비 중 사업</h3><span class="badge badge-i">9건</span></div>
-    <div class="sx"><table><thead><tr><th>#</th><th>발주처</th><th>사업명</th><th class="ar">사업비(억)</th><th>PM</th><th>단계</th></tr></thead><tbody>
-      <tr class="kr"><td>1</td><td class="tp">한국과학기술정보연구원</td><td>통합 바이오 데이터 분석·활용 시너지 플랫폼 구축 PMO</td><td class="ar fw">6</td><td>전은미</td><td><span class="cp cp-p">실공고</span></td></tr>
-      <tr class="kr"><td>2</td><td class="tp">NIA</td><td>2026년도 AI 데이터 구축 사업관리 전문 지원</td><td class="ar fw">9.39</td><td>이용근</td><td><span class="cp cp-p">실공고</span></td></tr>
-      <tr class="kr"><td>3</td><td class="tp">한국교육학술정보원</td><td>어플리케이션 분산처리체계 구축을 통한 K-에듀파인 현대화 PMO</td><td class="ar fw">56</td><td>이용근</td><td><span class="cp cp-p">실공고</span></td></tr>
-      <tr class="kr"><td>4</td><td class="tp">서울대학교 정보화본부</td><td>지능형 캠퍼스를 위한 차세대 네트워크망 구축 사업 PMO</td><td class="ar fw">18.54</td><td>김경수 대표</td><td><span class="cp cp-r">사전규격</span></td></tr>
-      <tr class="kr"><td>5</td><td class="tp">한국보건산업진흥원</td><td>국가통합바이오빅데이터구축사업 통합사업관리</td><td class="ar fw">5</td><td>전은미​</td><td><span class="cp cp-p">실공고</span></td></tr>
-      <tr class="kr"><td>6</td><td class="tp">한국사회보장정보원</td><td>사회서비스 정보 통합관리 기반 구축 PMO</td><td class="ar fw">19.6</td><td>김의겸</td><td><span class="cp cp-p">실공고</span></td></tr>
-      <tr class="kr"><td>7</td><td class="tp">KORAIL</td><td>KOVIS 시스템 고도화사업</td><td class="ar fw">34</td><td>최영성</td><td><span class="cp cp-n">발주예정</span></td></tr>
-      <tr class="kr"><td>8</td><td class="tp">KORAIL</td><td>차세대 예약발매시스템 구축</td><td class="ar fw">32</td><td>황윤호</td><td><span class="cp cp-n">발주예정</span></td></tr>
-      <tr class="kr"><td>9</td><td class="tp">네오트랜스</td><td>신분당선 통합시스템 고도화 사업 감리 (PMO포함)</td><td class="ar fw">18.7</td><td>이석배 
-(TBD)</td><td><span class="cp cp-n">발주예정</span></td></tr>
+    <div class="sx"><table><thead><tr><th>#</th><th>발주처</th><th>사업명</th><th class="ar">사업비(억)</th><th>PM</th><th>단계(접수일)</th></tr></thead><tbody>
+      <tr class="kr"><td>1</td><td class="tp">한국과학기술정보연구원</td><td><a href="#" onclick="goToKey(0);return false;" style="color:var(--ac);text-decoration:underline;cursor:pointer">통합 바이오 데이터 분석·활용 시너지 플랫폼 구축 PMO</a></td><td class="ar fw">6.0</td><td>전은미</td><td><span class="cp cp-p">실공고('26.04.14)</span></td></tr>
+      <tr class="kr"><td>2</td><td class="tp">NIA</td><td><a href="#" onclick="goToKey(1);return false;" style="color:var(--ac);text-decoration:underline;cursor:pointer">2026년도 AI 데이터 구축 사업관리 전문 지원</a></td><td class="ar fw">9.4</td><td>이용근</td><td><span class="cp cp-p">실공고(26.04.23)</span></td></tr>
+      <tr class="kr"><td>3</td><td class="tp">한국교육학술정보원</td><td><a href="#" onclick="goToKey(2);return false;" style="color:var(--ac);text-decoration:underline;cursor:pointer">어플리케이션 분산처리체계 구축을 통한 K-에듀파인 현대화 PMO</a></td><td class="ar fw">56.0</td><td>이용근</td><td><span class="cp cp-p">실공고(26.05.22)</span></td></tr>
+      <tr class="kr"><td>4</td><td class="tp">서울대학교 정보화본부</td><td><a href="#" onclick="goToKey(3);return false;" style="color:var(--ac);text-decoration:underline;cursor:pointer">지능형 캠퍼스를 위한 차세대 네트워크망 구축 사업 PMO</a></td><td class="ar fw">18.5</td><td>김경수 대표</td><td><span class="cp cp-r">사전규격(미정)</span></td></tr>
+      <tr class="kr"><td>5</td><td class="tp">한국보건산업진흥원</td><td><a href="#" onclick="goToKey(4);return false;" style="color:var(--ac);text-decoration:underline;cursor:pointer">국가통합바이오빅데이터구축사업 통합사업관리</a></td><td class="ar fw">5.0</td><td>전은미​</td><td><span class="cp cp-p">실공고(26.05.07)</span></td></tr>
+      <tr class="kr"><td>6</td><td class="tp">한국사회보장정보원</td><td><a href="#" onclick="goToKey(5);return false;" style="color:var(--ac);text-decoration:underline;cursor:pointer">사회서비스 정보 통합관리 기반 구축 PMO</a></td><td class="ar fw">19.6</td><td>김의겸</td><td><span class="cp cp-p">실공고(26.04.29)</span></td></tr>
+      <tr class="kr"><td>7</td><td class="tp">KORAIL</td><td><a href="#" onclick="goToKey(6);return false;" style="color:var(--ac);text-decoration:underline;cursor:pointer">KOVIS 시스템 고도화사업</a></td><td class="ar fw">34.0</td><td>최영성</td><td><span class="cp cp-n">발주예정(미정)</span></td></tr>
+      <tr class="kr"><td>8</td><td class="tp">KORAIL</td><td><a href="#" onclick="goToKey(7);return false;" style="color:var(--ac);text-decoration:underline;cursor:pointer">차세대 예약발매시스템 구축</a></td><td class="ar fw">32.0</td><td>황윤호</td><td><span class="cp cp-n">발주예정(미정)</span></td></tr>
+      <tr class="kr"><td>9</td><td class="tp">네오트랜스</td><td><a href="#" onclick="goToKey(8);return false;" style="color:var(--ac);text-decoration:underline;cursor:pointer">신분당선 통합시스템 고도화 사업 감리 (PMO포함)</a></td><td class="ar fw">18.7</td><td>이석배  (TBD)</td><td><span class="cp cp-n">발주예정(미정)</span></td></tr>
     </tbody></table></div>
   </div>
 </div>
@@ -461,7 +468,7 @@ function showSub(s,el){
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic a">📝</div><div class="kpi-lb">제안서 작성</div></div><div class="kpi-v" style="color:var(--am)">준비중</div></div>
   </div>
   <div class="cd"><div class="cd-h"><h3>📂 핵심사업 준비 상세</h3><span class="badge badge-i">▼ 클릭하여 세부내용 확인</span></div>
-    <div class="sx"><table><thead><tr><th>#</th><th>발주처</th><th>사업명</th><th class="ar">사업비(억)</th><th>PM</th><th>단계</th><th>인력배정</th><th>진행상황</th><th></th></tr></thead>
+    <div class="sx"><table><thead><tr><th>#</th><th>발주처</th><th>사업명</th><th class="ar">사업비(억)</th><th>PM</th><th>단계</th><th>평가방식</th><th>인력배정</th><th>진행상황</th></tr></thead>
     <tbody id="keyTbl"></tbody></table></div>
   </div>
 </div>
@@ -470,7 +477,7 @@ function showSub(s,el){
 <div class="pn" id="domestic">
   <div class="kpi-row">
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic b">📋</div><div class="kpi-lb">전체</div></div><div class="kpi-v">37<span class="kpi-u">건</span></div></div>
-    <div class="kpi"><div class="kpi-top"><div class="kpi-ic g">✅</div><div class="kpi-lb">수주</div></div><div class="kpi-v" style="color:var(--gr)">3<span class="kpi-u">건</span></div><div class="kpi-s">8.59억</div></div>
+    <div class="kpi"><div class="kpi-top"><div class="kpi-ic g">✅</div><div class="kpi-lb">수주</div></div><div class="kpi-v" style="color:var(--gr)">3<span class="kpi-u">건</span></div><div class="kpi-s">8.6억</div></div>
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic r">❌</div><div class="kpi-lb">실주</div></div><div class="kpi-v" style="color:var(--rd)">3<span class="kpi-u">건</span></div></div>
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic i">🔄</div><div class="kpi-lb">준비 중</div></div><div class="kpi-v" style="color:var(--ac)">9<span class="kpi-u">건</span></div></div>
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic a">📅</div><div class="kpi-lb">발주예정</div></div><div class="kpi-v" style="color:var(--am)">22<span class="kpi-u">건</span></div></div>
@@ -507,8 +514,7 @@ function showSub(s,el){
   </div>
   <div class="cd" style="margin-bottom:16px;border-left:3px solid var(--rd)"><div class="cd-h"><h3>⚠️ 이슈사업</h3><span class="badge badge-r">1건</span></div>
     <div class="sx"><table><thead><tr><th>프로젝트</th><th>발주기관</th><th>PM</th><th>이슈 내용</th></tr></thead><tbody>
-      <tr><td class="tp">정보시스템 유지관리 및 조직
-운영전략 수립용역</td><td>한국전력거래소</td><td>고경철</td><td style="color:var(--rd);font-size:11px"></td></tr>
+      <tr><td class="tp">정보시스템 유지관리 및 조직 운영전략 수립용역</td><td>한국전력거래소</td><td>고경철</td><td style="color:var(--rd);font-size:11px"></td></tr>
     </tbody></table></div>
   </div>
   <div class="cd"><div class="cd-h"><h3>수행 중인 프로젝트</h3><span class="badge badge-i">18건 · ▼ 클릭하여 진행현황 확인</span></div>
@@ -655,26 +661,25 @@ function tog(id){var r=document.getElementById(id);if(!r)return;r.classList.togg
 
 // ═══ DATA: 핵심사업 준비 ═══
 const KEY=[
-{n:1,org:"한국과학기술정보연구원",name:"통합 바이오 데이터 분석·활용 시너지 플랫폼 구축 PMO",amt:"6",pm:"전은미",stg:"실공고",cls:"cp-p",st:"- 가급적 정보화 프로젝트 경험이 있는 전문 기술 인력",pct:0,d:{req:"- PM요건",team:"- 가급적 정보화 프로젝트 경험이 있는 전문 기술 인력으로 구성
-- (권고사항) 바이오분야 PMO 프로젝트 수행 경험자",str:"",etc:""}},
-{n:2,org:"NIA",name:"2026년도 AI 데이터 구축 사업관리 전문 지원",amt:"9.39",pm:"이용근",stg:"실공고",cls:"cp-p",st:"준비 중",pct:0,d:{req:"- 인원구성 요건 : PM 1명 이상 투입, 전문인력 3명 이상, 지원인력 1명 이상",team:"",str:"",etc:""}},
-{n:3,org:"한국교육학술정보원",name:"어플리케이션 분산처리체계 구축을 통한 K-에듀파인 현대화 PMO",amt:"56",pm:"이용근",stg:"실공고",cls:"cp-p",st:"OK",pct:0,d:{req:"- PM 요건 : 사업공고일 전부터 12개월 이상 제안사에 재직 중인 직원",team:"",str:"OK",etc:""}},
-{n:4,org:"서울대학교 정보화본부",name:"지능형 캠퍼스를 위한 차세대 네트워크망 구축 사업 PMO",amt:"18.54",pm:"김경수 대표",stg:"사전규격",cls:"cp-r",st:"배정 완료",pct:100,d:{req:"- PM 요건",team:"공동수급체 대표자 소속 임직원으로서, 입찰공고일 전부터 제안서 평가일까지 계속 재직 중인 자",str:"배정 완료",etc:""}},
-{n:5,org:"한국보건산업진흥원",name:"국가통합바이오빅데이터구축사업 통합사업관리",amt:"5",pm:"전은미​",stg:"실공고",cls:"cp-p",st:"배정 완료",pct:100,d:{req:"- PM 구성 조건",team:"- PM은 반드시 제안사 소속 임직원이어야 하며, 입찰공고일 6개월 이전부터 제안서 평가일까지 계속 재직 중인 자",str:"배정 완료",etc:""}},
-{n:6,org:"한국사회보장정보원",name:"사회서비스 정보 통합관리 기반 구축 PMO",amt:"19.6",pm:"김의겸",stg:"실공고",cls:"cp-p",st:"준비 중",pct:0,d:{req:"- 인력 편성 (안) : 총 24명 (177.70MM)",team:"",str:"",etc:""}},
-{n:7,org:"KORAIL",name:"KOVIS 시스템 고도화사업",amt:"34",pm:"최영성",stg:"발주예정",cls:"cp-n",st:"준비 중",pct:0,d:{req:"- 인력 편성 (안) : 총 10명 (상주 4명, 비상주 6명) (174MM)",team:"",str:"",etc:""}},
-{n:8,org:"KORAIL",name:"차세대 예약발매시스템 구축",amt:"32",pm:"황윤호",stg:"발주예정",cls:"cp-n",st:"준비 중",pct:0,d:{req:"- 인력 편성 (안) : 총 10명 (상주 4명, 비상주 6명) (175MM)",team:"",str:"",etc:""}},
-{n:9,org:"네오트랜스",name:"신분당선 통합시스템 고도화 사업 감리 (PMO포함)",amt:"18.7",pm:"이석배 
-(TBD)",stg:"발주예정",cls:"cp-n",st:"섭외 중",pct:0,d:{req:"- PM 배정",team:"- PM 후보 : 이석배 (신분당선 통합정보시스템 구축, 차세대 여객영업시스템 구축, 광역정보센타 구축, 대전도시철도 통합MIS구축, 인천공항철도 포털시스템 재구축 등 9건 수행)",str:"섭외 중",etc:""}}
+{n:1,org:"한국과학기술정보연구원",name:"통합 바이오 데이터 분석·활용 시너지 플랫폼 구축 PMO",amt:"6.0",pm:"전은미",stg:"실공고",cls:"cp-p",sub:"\'26.04.14",eval:"자체평가",staff:"- 가급적 정보화 프로젝트 경험이 있는 전문 기술 인력으로 구성 - (권고사항) 바이오분야 PMO 프로젝트 수행 경험자",pct:0,st:"- 가급적 정보화 프로젝트 경험이 있는 전문 기술 인력으로 구성 - (권고사항) 바이오분야",d:{req:"- PM요건",team:"- 가급적 정보화 프로젝트 경험이 있는 전문 기술 인력으로 구성 - (권고사항) 바이오분야 PMO 프로젝트 수행 경험자",str:"",etc:""}},
+{n:2,org:"NIA",name:"2026년도 AI 데이터 구축 사업관리 전문 지원",amt:"9.4",pm:"이용근",stg:"실공고",cls:"cp-p",sub:"26.04.23",eval:"조달평가",staff:"- 인원구성 요건 : PM 1명 이상 투입, 전문인력 3명 이상, 지원인력 1명 이상",pct:0,st:"준비 중",d:{req:"- 인원구성 요건 : PM 1명 이상 투입, 전문인력 3명 이상, 지원인력 1명 이상",team:"",str:"",etc:""}},
+{n:3,org:"한국교육학술정보원",name:"어플리케이션 분산처리체계 구축을 통한 K-에듀파인 현대화 PMO",amt:"56.0",pm:"이용근",stg:"실공고",cls:"cp-p",sub:"26.05.22",eval:"조달평가",staff:"- PM 요건 : 사업공고일 전부터 12개월 이상 제안사에 재직 중인 직원",pct:0,st:"OK",d:{req:"- PM 요건 : 사업공고일 전부터 12개월 이상 제안사에 재직 중인 직원",team:"",str:"OK",etc:""}},
+{n:4,org:"서울대학교 정보화본부",name:"지능형 캠퍼스를 위한 차세대 네트워크망 구축 사업 PMO",amt:"18.5",pm:"김경수 대표",stg:"사전규격",cls:"cp-r",sub:"미정",eval:"자체평가",staff:"- PM 요건",pct:100,st:"배정 완료",d:{req:"- PM 요건",team:"공동수급체 대표자 소속 임직원으로서, 입찰공고일 전부터 제안서 평가일까지 계속 재직 중인 자",str:"배정 완료",etc:""}},
+{n:5,org:"한국보건산업진흥원",name:"국가통합바이오빅데이터구축사업 통합사업관리",amt:"5.0",pm:"전은미​",stg:"실공고",cls:"cp-p",sub:"26.05.07",eval:"자체평가",staff:"- PM은 반드시 제안사 소속 임직원이어야 하며, 입찰공고일 6개월 이전부터 제안서 평가일까지 계속 재직 중인 자",pct:100,st:"배정 완료",d:{req:"- PM 구성 조건",team:"- PM은 반드시 제안사 소속 임직원이어야 하며, 입찰공고일 6개월 이전부터 제안서 평가일까지 계속 재직 중인 자",str:"배정 완료",etc:""}},
+{n:6,org:"한국사회보장정보원",name:"사회서비스 정보 통합관리 기반 구축 PMO",amt:"19.6",pm:"김의겸",stg:"실공고",cls:"cp-p",sub:"26.04.29",eval:"조달평가",staff:"- 인력 편성 (안) : 총 24명 (177 / 70MM)",pct:0,st:"준비 중",d:{req:"- 인력 편성 (안) : 총 24명 (177.70MM)",team:"",str:"",etc:""}},
+{n:7,org:"KORAIL",name:"KOVIS 시스템 고도화사업",amt:"34.0",pm:"최영성",stg:"발주예정",cls:"cp-n",sub:"미정",eval:"",staff:"- 인력 편성 (안) : 총 10명 (상주 4명, 비상주 6명) (174MM)",pct:0,st:"준비 중",d:{req:"- 인력 편성 (안) : 총 10명 (상주 4명, 비상주 6명) (174MM)",team:"",str:"",etc:""}},
+{n:8,org:"KORAIL",name:"차세대 예약발매시스템 구축",amt:"32.0",pm:"황윤호",stg:"발주예정",cls:"cp-n",sub:"미정",eval:"",staff:"- 인력 편성 (안) : 총 10명 (상주 4명, 비상주 6명) (175MM)",pct:0,st:"준비 중",d:{req:"- 인력 편성 (안) : 총 10명 (상주 4명, 비상주 6명) (175MM)",team:"",str:"",etc:""}},
+{n:9,org:"네오트랜스",name:"신분당선 통합시스템 고도화 사업 감리 (PMO포함)",amt:"18.7",pm:"이석배  (TBD)",stg:"발주예정",cls:"cp-n",sub:"미정",eval:"",staff:"- PM 후보 : 이석배 (신분당선 통합정보시스템 구축, 차세대 여객영업시스템 구축, 광역정보센타 구축, 대전도시철도 통합MIS구축, 인천공항철",pct:0,st:"섭외 중",d:{req:"- PM 배정",team:"- PM 후보 : 이석배 (신분당선 통합정보시스템 구축, 차세대 여객영업시스템 구축, 광역정보센타 구축, 대전도시철도 통합MIS구축, 인천공항철도 포털시스템 재구축 등 9건 수행)",str:"섭외 중",etc:""}}
 ];
 const kt=document.getElementById('keyTbl');
-KEY.forEach((k,i)=>{let pc=k.pct;let pcl=pc>=80?'#10b981':pc>=50?'#e8930c':'#e53e3e';if(pc===0)pcl='#8898aa';
-kt.innerHTML+=`<tr>
+KEY.forEach((k,i)=>{
+let stgTxt=k.stg;if(k.sub)stgTxt=k.stg.split('(')[0]+'('+k.sub+')';
+kt.innerHTML+=`<tr id="key-row-${i}">
 <td>${k.n}</td><td class="tp">${k.org}</td><td style="max-width:200px">${k.name}</td>
 <td class="ar fw">${k.amt}</td><td class="tp">${k.pm}</td>
-<td><span class="cp ${k.cls}">${k.stg}</span></td>
-<td><div class="pw"><div class="pb"><div class="pf" style="width:${pc}%;background:${pcl}"></div></div><div class="pt" style="color:${pcl}">${pc}%</div></div></td>
-<td style="font-size:10.5px">${k.st}</td>
+<td><span class="cp ${k.cls}">${stgTxt}</span></td>
+<td style="font-size:10.5px">${k.eval||'-'}</td>
+<td style="font-size:10.5px">${k.staff||'미정'}</td>
 <td><button class="exp-btn" onclick="tog('kd${i}')">상세 ▼</button></td>
 </tr><tr class="dr" id="kd${i}"><td colspan="9" class="dc"><div class="dg">
 <div class="di"><div class="dl">PM 요건</div><div class="dv">${k.d.req}</div></div>
@@ -687,30 +692,21 @@ kt.innerHTML+=`<tr>
 
 // ═══ DATA: 국내 제안현황 ═══
 const DOM=[
-[1,"한국교육과정평가원","AI기반 학력진단시스템, 국가기초학력지원포털 구축 2차 PMO",6.39,"최정문","백광호","조달평가","수주","80%","개찰완료",false],
-[2,"KOTRA","방글라데시 NSEZ 스마트 신도시·산업단지 개발 로드맵 검토 및 분야별 프로젝트 제안",2.94,"고경철","박효구,김재경","자체평가","실주","85%","개찰완료",false],
-[3,"식품의약품안전처","의약품 AI 심사 및 산업지원 체계 구축 PMO 용역",2.13,"구경모","김의겸,김용효,김재경","서면평가,
-조달평가","수주","0.9995","개찰완료",false],
-[4,"법무부","전송형 전자영장 집행시스템 구축 PMO",4.63,"최상훈","유동화,박영배","서면평가,
-조달평가","실주","0.999","개찰완료",false],
-[5,"한국개발연구원","「2025/26년 경제발전경험공유사업」이탈리아 정책자문사업",3.37,"한용호","김재경,이병식,서수경","자체평가","실주","0.8","개찰완료",false],
-[6,"성평등가족부​","아이돌봄사 국가자격 관리시스템 구축 PMO 사업",1.68,"손진","김용효,김의겸,김학동,김재경","조달평가","수주","80%","개찰완료",false],
-[7,"한국과학기술정보연구원","통합 바이오 데이터 분석·활용 시너지 플랫폼 구축 PMO",6,"전은미","김용효,이동원,
-김학동,김재경","자체평가","준비 중","-","실공고",true],
-[8,"한국지능정보사회진흥원","2026년도 AI 데이터 구축 사업관리 전문 지원",9.39,"이용근/안현섭","안현섭,서석민","조달평가","준비 중","-","실공고",true],
-[9,"한국교육학술정보원","어플리케이션 분산처리체계 구축을 통한 K-에듀파인 현대화 PMO",56,"이용근","김용효,유재련,양제연","조달평가","준비 중","-","실공고",true],
-[10,"서울대학교 정보화본부","지능형 캠퍼스를 위한 차세대 네트워크망 구축 사업 PMO",18.54,"김경수/황윤호","김경수, 이상현 김상주, 임종헌","자체평가","준비 중","-","사전규격",true],
-[11,"한국보건산업진흥원","국가통합바이오빅데이터구축사업 통합사업관리",5,"이동원/전은미","전은미, 이동원 
-김용효, 김재경​","자체평가","준비 중","-","실공고",true],
-[12,"한국사회보장정보원","사회서비스 정보 통합관리 기반 구축 사업관리 위탁(PMO) 용역",19.6,"김의겸","김용효,김학동,
-김재경","조달평가","준비 중","-","실공고",true],
-[13,"KORAIL","KOVIS 시스템 고도화사업",34,"최영성","최영성, 권순열
-정옥영, 김용효​","","준비 중","-","발주예정",true],
-[14,"KORAIL","차세대 예약발매시스템 구축",32,"황윤호","황윤호, 전은미 
-정옥영, 김용효​","","준비 중","-","발주예정",true],
-[15,"네오트랜스","신분당선 통합시스템 고도화 사업 감리 (PMO포함)",18.7,"이석배 
-(TBD)","황윤호, 전은미 
-정옥영, 김용효​","","준비 중","-","발주예정",true]
+[1,"한국교육과정평가원","AI기반 학력진단시스템, 국가기초학력지원포털 구축 2차 PMO",6.4,"최정문","백광호","조달평가","수주","80.0%","개찰완료",false],
+[2,"KOTRA","방글라데시 NSEZ 스마트 신도시·산업단지 개발 로드맵 검토 및 분야별 프로젝트 제안",2.9,"고경철","박효구,김재경","자체평가","실주","85.0%","개찰완료",false],
+[3,"식품의약품안전처","의약품 AI 심사 및 산업지원 체계 구축 PMO 용역",2.1,"구경모","김의겸,김용효,김재경","서면평가, 조달평가","수주","100.0%","개찰완료",false],
+[4,"법무부","전송형 전자영장 집행시스템 구축 PMO",4.6,"최상훈","유동화,박영배","서면평가, 조달평가","실주","99.9%","개찰완료",false],
+[5,"한국개발연구원","「2025/26년 경제발전경험공유사업」이탈리아 정책자문사업",3.4,"한용호","김재경,이병식,서수경","자체평가","실주","80.0%","개찰완료",false],
+[6,"성평등가족부​","아이돌봄사 국가자격 관리시스템 구축 PMO 사업",1.7,"손진","김용효,김의겸,김학동,김재경","조달평가","수주","80.0%","개찰완료",false],
+[7,"한국과학기술정보연구원","통합 바이오 데이터 분석·활용 시너지 플랫폼 구축 PMO",6.0,"전은미","김용효,이동원, 김학동,김재경","자체평가","준비 중","-","실공고(\'26.04.14)",true],
+[8,"한국지능정보사회진흥원","2026년도 AI 데이터 구축 사업관리 전문 지원",9.4,"이용근/안현섭","안현섭,서석민","조달평가","준비 중","-","실공고(26.04.23)",true],
+[9,"한국사회보장정보원","사회서비스 정보 통합관리 기반 구축 사업관리 위탁(PMO) 용역",19.6,"김의겸","김용효,김학동, 김재경","조달평가","준비 중","-","실공고(26.04.29)",true],
+[10,"한국교육학술정보원","어플리케이션 분산처리체계 구축을 통한 K-에듀파인 현대화 PMO",56.0,"이용근","김용효,유재련,양제연","조달평가","준비 중","-","실공고(26.05.22)",true],
+[11,"한국보건산업진흥원","국가통합바이오빅데이터구축사업 통합사업관리",5.0,"이동원/전은미","전은미, 이동원  김용효, 김재경​","자체평가","준비 중","-","실공고(26.05.07)",true],
+[12,"서울대학교 정보화본부","지능형 캠퍼스를 위한 차세대 네트워크망 구축 사업 PMO",18.5,"김경수/황윤호","김경수, 이상현 김상주, 임종헌","자체평가","준비 중","-","사전규격(미정)",true],
+[13,"KORAIL","KOVIS 시스템 고도화사업",34.0,"최영성","최영성, 권순열 정옥영, 김용효​","","준비 중","-","발주예정(미정)",true],
+[14,"KORAIL","차세대 예약발매시스템 구축",32.0,"황윤호","황윤호, 전은미  정옥영, 김용효​","","준비 중","-","발주예정(미정)",true],
+[15,"네오트랜스","신분당선 통합시스템 고도화 사업 감리 (PMO포함)",18.7,"이석배  (TBD)","황윤호, 전은미  정옥영, 김용효​","","준비 중","-","발주예정(미정)",true]
 ];
 const dt=document.getElementById('domTbl');
 DOM.forEach(d=>{const c=d[7]==='수주'?'cp-w':d[7]==='실주'?'cp-l':'cp-p';const stg_cls=d[9]==='개찰완료'?'cp-c':d[9]==='실공고'?'cp-p':d[9]==='사전규격'?'cp-r':'cp-n';const isKey=d[10];
@@ -720,21 +716,17 @@ dt.innerHTML+=`<tr${isKey?' class="kr"':''}><td>${d[0]}</td><td class="tp">${d[1
 
 // ═══ DATA: 국내 발주예정 ═══
 const DU=[
-[1,"한국산업은행","KDB Paper-Less 시스템 구축사업 PMO",10,"4월 예정 예정","",""],
+[1,"한국산업은행","KDB Paper-Less 시스템 구축사업 PMO",10.0,"4월 예정 예정","",""],
 [2,"한국사회보장정보원","돌봄 통합지원정보시스템 구축 PMO",7.1,"4월 예정 예정","",""],
-[3,"안산시​​","강소형 스마트도시 PMO ​​​​",5,"4월 예정 예정","황윤호","김정환
-이병성"],
-[4,"태백시​​","강소형 스마트도시 조성사업 PMO ​​",3,"4월 예정 예정","황윤호","김정환
-이병성"],
+[3,"안산시​​","강소형 스마트도시 PMO ​​​​",5.0,"4월 예정 예정","황윤호","김정환 이병성"],
+[4,"태백시​​","강소형 스마트도시 조성사업 PMO ​​",3.0,"4월 예정 예정","황윤호","김정환 이병성"],
 [5,"한국부동산원","한국부동산원 PMO 사업",1.5,"4월 예정 예정","고객 미팅  후 배정여부 결정 예정","-"],
 [6,"자동차손해배상진흥원","자동차사고 경상환자 장기치료 분쟁조정 시스템 구축 PMO","미정","4~6월 예정 예정","",""],
 [7,"KORAIL","RAIL AI 허브 구축",13.8,"6월 예정 예정","","-"],
-[8,"NIA","공공부문 이용 AI-SaaS 개발검증사업​​",5,"6월 예정 예정","박효구","정준화
-박영배"],
-[9,"행정안전부","차세대 지방행정공통시스템 구축 PMO",70,"7월 예정 예정","이용근/김의겸","이정우
-김장원"],
+[8,"NIA","공공부문 이용 AI-SaaS 개발검증사업​​",5.0,"6월 예정 예정","박효구","정준화 박영배"],
+[9,"행정안전부","차세대 지방행정공통시스템 구축 PMO",70.0,"7월 예정 예정","이용근/김의겸","이정우 김장원"],
 [10,"경기주택공사","MIS 재구축 PMO 용역",11.8,"10월 예정 예정","전은미","-"],
-[11,"강원랜드","강원랜드 CMS 2.0 구축 PMO",10,"27. 1월 예정 예정","박승근","-"],
+[11,"강원랜드","강원랜드 CMS 2.0 구축 PMO",10.0,"27. 1월 예정 예정","박승근","-"],
 [12,"기획재정부​","2025-2027년 공공업무시스템 유지/운영관리 및 기능개선 PMO","미정","미정","",""],
 [13,"국방","국방안전관리정보체계 구축사업 PMO",6.4,"미정","",""],
 [14,"국방","육군 전술정보데이터 품질관리시스템 PMO",7.4,"미정","",""],
@@ -754,27 +746,25 @@ DU.forEach(d=>{dut.innerHTML+=`<tr><td>${d[0]}</td><td class="tp">${d[1]}</td><t
 
 // ═══ DATA: 해외 제안준비 ═══
 const OVS=[
-[1,"KOICA","인도네시아","인도네시아 국가사무처 디지털 전환 기반 구축을 위한 마스터플랜 수립 및 역량강화 사업 PMC 용역",39.68,"이상훈
-（외부인력）","개찰완료","실주"],
-[2,"KOTRA (EIPP)","방글라데시","방글라데시 NSEZ 스마트 신도시·산업단지 개발 로드맵 검토 및 분야별 프로젝트 제안",2.94,"고경철","개찰완료","실주"],
-[3,"KOICA","타지키스탄","타지키스탄 정부기능 디지털 전환 이행 지원사업 PMC 용역",60.3,"넥스트
-아이앤아이","접수","준비 중"],
-[4,"KOICA","이탈리아","「2025/26년 경제발전경험공유사업(KSP)」이탈리아 정책자문사업",3.37,"한용호(외부)","개찰완료","실주"],
-[5,"KOICA","필리핀","필리핀 사이버 위기대응 역량강화를 위한 국가사이버안전센터 구축사업 PMC 용역",44.75,"","불참","불참"],
-[6,"KOICA","카자흐스탄","카자흐스탄 알라타우 신도시 스마트타운 마스터플랜 수립",8,"","불참","불참"],
-[7,"KOICA","폴란드","폴란드 루블린 스마트시티 마스터플랜 수립 및 통합관제센터 구축계획",7,"","불참","불참"],
-[8,"KOICA","도미니카 공화국","도미니카공화국 카리브해 해조류(모자반) 재해 대응 및 관리 역량강화 사업 PMC 용역",70.57,"","사전규격",""],
-[9,"KOICA","콜롬비아","콜롬비아 반부패 포털(PACO) 고도화를 통한 투명성 강화 사업 PMC",41,"","발주예정",""],
+[1,"KOICA","인도네시아","인도네시아 국가사무처 디지털 전환 기반 구축을 위한 마스터플랜 수립 및 역량강화 사업 PMC 용역",39.7,"이상훈 （외부인력）","개찰완료","실주"],
+[2,"KOTRA (EIPP)","방글라데시","방글라데시 NSEZ 스마트 신도시·산업단지 개발 로드맵 검토 및 분야별 프로젝트 제안",2.9,"고경철","개찰완료","실주"],
+[3,"KOICA","타지키스탄","타지키스탄 정부기능 디지털 전환 이행 지원사업 PMC 용역",60.3,"넥스트 아이앤아이","접수","준비 중"],
+[4,"KOICA","이탈리아","「2025/26년 경제발전경험공유사업(KSP)」이탈리아 정책자문사업",3.4,"한용호(외부)","개찰완료","실주"],
+[5,"KOICA","필리핀","필리핀 사이버 위기대응 역량강화를 위한 국가사이버안전센터 구축사업 PMC 용역",44.7,"","불참","불참"],
+[6,"KOICA","카자흐스탄","카자흐스탄 알라타우 신도시 스마트타운 마스터플랜 수립",8.0,"","불참","불참"],
+[7,"KOICA","폴란드","폴란드 루블린 스마트시티 마스터플랜 수립 및 통합관제센터 구축계획",7.0,"","불참","불참"],
+[8,"KOICA","도미니카 공화국","도미니카공화국 카리브해 해조류(모자반) 재해 대응 및 관리 역량강화 사업 PMC 용역",70.6,"","사전규격",""],
+[9,"KOICA","콜롬비아","콜롬비아 반부패 포털(PACO) 고도화를 통한 투명성 강화 사업 PMC",41.0,"","발주예정",""],
 [10,"KOICA","에티오피아","에티오피아 무역활성화를 위한 통합 관세행정 시스템 구축 사업 PMC",16.1,"","발주예정",""],
-[11,"KOICA","네팔","네팔 떠라이(Terai)지역 기후탄력적 벼품종 재배 및 쌀생산량 증대사업 PMC 용역",141,"","발주예정",""],
-[12,"KOICA","파라과이","파라과이 소농의 지속가능한 기후변화 적응력 강화사업 PMC 용역",124,"","발주예정",""],
-[13,"KOICA","파라과이","파라과이 아순시온시 통합 관제 서비스 개선 및 공공안전 마스터플랜 수립 사업 PMC",43,"","발주예정",""],
-[14,"KOICA","라오스","라오스 공무원 디지털 역량강화를 위한 국립 D-HRD센터 설립사업 PMC",34,"","발주예정",""],
-[15,"KOICA","필리핀","필리핀 전자정부 신뢰성 강화를 위한 한국형 분산 신원인증(K-DID) 시스템 구축 PMC",124,"","발주예정",""],
+[11,"KOICA","네팔","네팔 떠라이(Terai)지역 기후탄력적 벼품종 재배 및 쌀생산량 증대사업 PMC 용역",141.0,"","발주예정",""],
+[12,"KOICA","파라과이","파라과이 소농의 지속가능한 기후변화 적응력 강화사업 PMC 용역",124.0,"","발주예정",""],
+[13,"KOICA","파라과이","파라과이 아순시온시 통합 관제 서비스 개선 및 공공안전 마스터플랜 수립 사업 PMC",43.0,"","발주예정",""],
+[14,"KOICA","라오스","라오스 공무원 디지털 역량강화를 위한 국립 D-HRD센터 설립사업 PMC",34.0,"","발주예정",""],
+[15,"KOICA","필리핀","필리핀 전자정부 신뢰성 강화를 위한 한국형 분산 신원인증(K-DID) 시스템 구축 PMC",124.0,"","발주예정",""],
 [16,"KOICA","필리핀","필리핀 사법 효율성 및 접근성 개선을 위한 사법 정보 디지털화 및 역량강화사업 PMC용역",33.1,"","발주예정",""],
-[17,"KOICA","인도네시아","인도네시아 한-인니 쌀혁신센터 설립을 통한 벼생산성 향상 및 쌀생산량 증대사업 PMC 용역",132,"","발주예정",""],
-[18,"KOICA","베트남","베트남 감염병 감시정보시스템 구축  및 감염병 대응 역량강화 사업 PMC",45,"","발주예정",""],
-[19,"KOICA","우간다","우간다 감염병 예방 및 대응체계 강화  사업 PMC 용역",5,"","발주예정",""]
+[17,"KOICA","인도네시아","인도네시아 한-인니 쌀혁신센터 설립을 통한 벼생산성 향상 및 쌀생산량 증대사업 PMC 용역",132.0,"","발주예정",""],
+[18,"KOICA","베트남","베트남 감염병 감시정보시스템 구축  및 감염병 대응 역량강화 사업 PMC",45.0,"","발주예정",""],
+[19,"KOICA","우간다","우간다 감염병 예방 및 대응체계 강화  사업 PMC 용역",5.0,"","발주예정",""]
 ];
 const ot=document.getElementById('ovsTbl');
 OVS.forEach(o=>{const c=o[7]==='실주'?'cp-l':o[7]==='준비 중'?'cp-p':o[7]==='발주예정'?'cp-r':'cp-n';
@@ -784,34 +774,24 @@ ot.innerHTML+=`<tr><td>${o[0]}</td><td class="tp">${o[1]}</td><td>${o[2]}</td><t
 
 // ═══ DATA: 수행 프로젝트 ═══
 const PRJ=[
-[1,"PMO","강원랜드 ERP 시스템구축 PMO","강원랜드","박승근","23/11/10 ~ 26/05/31",9.41,11072513,97.7,"0",""],
+[1,"PMO","강원랜드 ERP 시스템구축 PMO","강원랜드","박승근","23/11/10 ~ 26/05/31",9.4,11072513,97.7,"0",""],
 [2,"PMO","농림축산식품부 차세대 농업농촌통합정보시스템구축 PMO","농림축산식품부","이동원","23/11/07 ~ 26/12/31",17.3,11307190,84.3,"0",""],
-[3,"PMO","기획재정부 국가결산보고서개편 시스템구축 PMO 용역 사업","기획재정부","손진","24/04/06 ~ 26/03/31",3.19,10296774,100.0,"0",""],
-[4,"PMO","AI 맞춤형 교수학습 플랫폼 1차 구축 사업관리 전문지원","한국지능정보사회
-진흥원","황윤호","24/05/07 ~ 26/04/08",12,11538462,99.2,"",""],
-[5,"PMO","차세대 국가자산처분시스템
-(온비드)구축 PMO 용역","자산관리공사","구경모","24/08/19 ~ 26/04/30",13.63,10732283,97.0,"",""],
-[6,"PMO","광명시 강소형 스마트도시 조성사업 PMO","광명시","김정환","25/05/15~27/05/14",3.28,8200000,47.5,"",""],
-[7,"PMO","자활지원사업 통합정보전산망
-구축 PMO 용역","한국자활복지
-개발원","이경민","25/06/30~26/06/30",1.86,7290196,74.1,"",""],
-[8,"PMO","한국교직원공제회 S2B 재구축 PMO 용역","한국교직원공제회","유재련","25/07/01 ~ 27/03/31",10.45,9008621,39.2,"",""],
-[9,"PMO","정책보험 WEB-EDI심사시스템
-구축 PMO 용역","수협중앙회","김재호","25/07/30 ~ 26/08/14",5.05,9709615,90.4,"",""],
-[10,"PMO","돌봄 통합지원정보시스템 구축
-(1단계) PMO 사업","한국사회보장
-정보원","유동화","25/09/08 ~ 26/08/04",4.69,10841618,72.8,"",""],
-[11,"컨설팅","정보시스템 유지관리 및 조직
-운영전략 수립용역","한국전력거래소","고경철","25/07/30~26/03/20",2.81,17562500,152.5,"",""],
-[12,"PMO","5차년도 빅데이터 AI플랫폼 아이톡톡 구축 사업관리 위탁 PMO용역","경상남도교육청
-(미래교육원)","김종민","26/01/12~26/12/18",2.5,7996800,9.0,"",""],
-[13,"PMO","AI기반 학력진단시스템,국가기초학력지원 포털구축2차 PMO","한국교육과정평가원","최정문","26/01/29~26/12/31",5.12,8669831,13.6,"",""],
-[14,"PMO","의약품 AI심사 및 산업지원 체계구축(1차) PMO","식약처","구경모","26/03/03~26/12/31",2.13,9256522,4.3,"",""],
-[15,"PMO","아이돌봄사 국가자격 관리시스템 구축 PMO 사업","성평등가족부","손진","26/03/19~26/12/31",1.34,10688000,0.0,"",""],
-[16,"PMC","페루 클라우드 기반 중앙부처 전자문서 통합관리시스템 구축사업 PMC 용역","KOICA","이도철","24/01/17~ 27/12/31",22.31,0,73.7,"98461262",""],
-[17,"PMC","콜롬비아 다목적 지적을 위한 공간정보 역량강화 체계 구축사업 PMC 용역","KOICA","고대성
-(변경)","25/09/25~ 29/09/24",16.5,0,2.6,"78571429",""],
-[18,"PMC","페루 이민청 이민행정서비스 개선 및 역량강화 PMC 용역","KOICA","이정우","25/12/11~ 29/12/31",6.98,0,0.0,"0",""]
+[3,"PMO","기획재정부 국가결산보고서개편 시스템구축 PMO 용역 사업","기획재정부","손진","24/04/06 ~ 26/03/31",3.2,10296774,100.0,"0",""],
+[4,"PMO","AI 맞춤형 교수학습 플랫폼 1차 구축 사업관리 전문지원","한국지능정보사회 진흥원","황윤호","24/05/07 ~ 26/04/08",12.0,11538462,99.2,"",""],
+[5,"PMO","차세대 국가자산처분시스템 (온비드)구축 PMO 용역","자산관리공사","구경모","24/08/19 ~ 26/04/30",13.6,10732283,97.0,"",""],
+[6,"PMO","광명시 강소형 스마트도시 조성사업 PMO","광명시","김정환","25/05/15~27/05/14",3.3,8200000,47.5,"",""],
+[7,"PMO","자활지원사업 통합정보전산망 구축 PMO 용역","한국자활복지 개발원","이경민","25/06/30~26/06/30",1.9,7290196,74.1,"",""],
+[8,"PMO","한국교직원공제회 S2B 재구축 PMO 용역","한국교직원공제회","유재련","25/07/01 ~ 27/03/31",10.4,9008621,39.2,"",""],
+[9,"PMO","정책보험 WEB-EDI심사시스템 구축 PMO 용역","수협중앙회","김재호","25/07/30 ~ 26/08/14",5.0,9709615,90.4,"",""],
+[10,"PMO","돌봄 통합지원정보시스템 구축 (1단계) PMO 사업","한국사회보장 정보원","유동화","25/09/08 ~ 26/08/04",4.7,10841618,72.8,"",""],
+[11,"컨설팅","정보시스템 유지관리 및 조직 운영전략 수립용역","한국전력거래소","고경철","25/07/30~26/03/20",2.8,17562500,152.5,"",""],
+[12,"PMO","5차년도 빅데이터 AI플랫폼 아이톡톡 구축 사업관리 위탁 PMO용역","경상남도교육청 (미래교육원)","김종민","26/01/12~26/12/18",2.5,7996800,9.0,"",""],
+[13,"PMO","AI기반 학력진단시스템,국가기초학력지원 포털구축2차 PMO","한국교육과정평가원","최정문","26/01/29~26/12/31",5.1,8669831,13.6,"",""],
+[14,"PMO","의약품 AI심사 및 산업지원 체계구축(1차) PMO","식약처","구경모","26/03/03~26/12/31",2.1,9256522,4.3,"",""],
+[15,"PMO","아이돌봄사 국가자격 관리시스템 구축 PMO 사업","성평등가족부","손진","26/03/19~26/12/31",1.3,10688000,0.0,"",""],
+[16,"PMC","페루 클라우드 기반 중앙부처 전자문서 통합관리시스템 구축사업 PMC 용역","KOICA","이도철","24/01/17~ 27/12/31",22.3,0,73.7,"98461262",""],
+[17,"PMC","콜롬비아 다목적 지적을 위한 공간정보 역량강화 체계 구축사업 PMC 용역","KOICA","고대성 (변경)","25/09/25~ 29/09/24",16.5,0,2.6,"78571429",""],
+[18,"PMC","페루 이민청 이민행정서비스 개선 및 역량강화 PMC 용역","KOICA","이정우","25/12/11~ 29/12/31",7.0,0,0.0,"0",""]
 ];
 const ISSUE_IDX=[10];
 const pt=document.getElementById('prjTbl');
