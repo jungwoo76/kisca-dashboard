@@ -674,12 +674,13 @@ const KEY=[
 const kt=document.getElementById('keyTbl');
 KEY.forEach((k,i)=>{
 let stgTxt=k.stg;if(k.sub)stgTxt=k.stg.split('(')[0]+'('+k.sub+')';
+let sfShort=(k.staff||'미정').substring(0,30);if((k.staff||'').length>30)sfShort+='…';
 kt.innerHTML+=`<tr id="key-row-${i}">
 <td>${k.n}</td><td class="tp">${k.org}</td><td style="max-width:200px">${k.name}</td>
 <td class="ar fw">${k.amt}</td><td class="tp">${k.pm}</td>
 <td><span class="cp ${k.cls}">${stgTxt}</span></td>
 <td style="font-size:10.5px">${k.eval||'-'}</td>
-<td style="font-size:10.5px">${k.staff||'미정'}</td>
+<td style="font-size:10.5px;max-width:150px" title="${k.staff||''}">${sfShort}</td>
 <td><button class="exp-btn" onclick="tog('kd${i}')">상세 ▼</button></td>
 </tr><tr class="dr" id="kd${i}"><td colspan="9" class="dc"><div class="dg">
 <div class="di"><div class="dl">PM 요건</div><div class="dv">${k.d.req}</div></div>
