@@ -17,6 +17,24 @@ h1{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
 .hdr-r{display:flex;align-items:center;gap:8px}
 .vat-tag{font-size:10px;color:var(--rd);font-weight:600;background:var(--rl);padding:3px 8px;border-radius:5px}
 .date-tag{background:var(--s2);color:var(--ts);padding:4px 12px;border-radius:14px;font-size:11px;font-weight:600}
+/* ── Login Overlay ── */
+.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(26,31,54,.85);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-overlay.hidden{display:none}
+.login-box{background:var(--wh);border-radius:16px;padding:40px 36px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center}
+.login-box .logo-lg{width:48px;height:48px;background:var(--ac);border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:900;margin-bottom:16px}
+.login-box h2{font-size:18px;font-weight:800;margin-bottom:4px;color:var(--tx)}
+.login-box .sub{font-size:12px;color:var(--ts);margin-bottom:24px}
+.login-box input{width:100%;padding:11px 14px;border:1.5px solid var(--bd);border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border .2s;margin-bottom:12px}
+.login-box input:focus{border-color:var(--ac)}
+.login-box .btn-login{width:100%;padding:11px;background:var(--ac);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .2s}
+.login-box .btn-login:hover{opacity:.9}
+.login-box .err-msg{color:var(--rd);font-size:11px;margin-top:8px;min-height:16px}
+/* ── Logout Button ── */
+.btn-logout{background:none;border:1.5px solid var(--bd);color:var(--ts);padding:4px 12px;border-radius:14px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;margin-left:8px;transition:all .2s}
+.btn-logout:hover{border-color:var(--rd);color:var(--rd)}
+.user-tag{background:var(--al);color:var(--ac);padding:4px 10px;border-radius:14px;font-size:11px;font-weight:700}
+/* 로그인 전 콘텐츠 숨김 */
+body.locked header,body.locked .nav-wrap,body.locked .ct{display:none}
 
 /* Tabs */
 .nav-wrap{background:var(--wh);border-bottom:1px solid var(--bd);padding:0 60px;position:sticky;top:56px;z-index:99}
@@ -145,7 +163,134 @@ tr.kr{background:rgba(99,91,255,.02)}
 }
 </style>
 </head>
-<body>
+<body class="locked">
+
+<!-- ── Login Overlay ── -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="logo-lg">P</div>
+    <h2>PMC 대시보드 로그인</h2>
+    <p class="sub">권한에 따라 접근 가능한 메뉴가 다릅니다</p>
+    <input type="text" id="loginId" placeholder="아이디" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('loginPw').focus()">
+    <input type="password" id="loginPw" placeholder="비밀번호" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" onclick="doLogin()">로그인</button>
+    <div class="err-msg" id="loginErr"></div>
+  </div>
+</div>
+
+<script>
+/* ═══ AUTH: SHA-256 해시 로그인 + 역할별 탭 제어 ═══ */
+
+// SHA-256 해시 함수 (Web Crypto API)
+async function sha256(msg){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── 사용자 DB (SHA-256 해시 저장 — 소스에 비밀번호 원문 없음) ──
+// 계정 추가/비밀번호 변경 시: 콘솔에서 generateHash('새비밀번호') 실행 → 해시값 복사하여 교체
+const USERS={
+  admin:          {hash:'ac9689e2272427085e35b9d3e3e8bed88cb3434828b43b86fc0596cad4c6e270',role:'admin'},
+  ceo:            {hash:'bed7417ab2c7cec8830942b76132f828755a94218cef5ebcd35439cf21968999',role:'admin'},
+  vice_president: {hash:'6a28b34f301642dda03ad8da8699ec21c9ebf7aa9cfed6366d12993a51e07f11',role:'admin'},
+  manager:        {hash:'7b7686ab7dddaa1566a4922a9f8f964eb2d0b2fd193648e4fd7c0a81a708164b',role:'manager'},
+  viewer:         {hash:'b842c07f3384db40b26fee223040febcd05d8144c576c2113d49280dbb1b0c2d',role:'viewer'}
+};
+// 콘솔에서 해시 생성 도우미: generateHash('비밀번호')
+window.generateHash=async function(pw){const h=await sha256(pw);console.log(pw,'→',h);return h;};
+
+// ── 역할별 접근 가능 탭 ──
+const ROLE_TABS={
+  admin:   ['overview','staff','domestic','key','overseas','projects','mgmt','trend'],
+  manager: ['overview','domestic','key','overseas','projects','trend'],
+  viewer:  ['overview','projects','trend']
+};
+
+var currentRole=null;
+
+async function doLogin(){
+  const id=document.getElementById('loginId').value.trim();
+  const pw=document.getElementById('loginPw').value;
+  const errEl=document.getElementById('loginErr');
+  if(!id||!pw){errEl.textContent='아이디와 비밀번호를 입력하세요';return;}
+  const user=USERS[id];
+  if(!user){errEl.textContent='존재하지 않는 아이디입니다';return;}
+  const h=await sha256(pw);
+  if(h!==user.hash){errEl.textContent='비밀번호가 일치하지 않습니다';return;}
+  // 로그인 성공
+  currentRole=user.role;
+  sessionStorage.setItem('pmc_role',user.role);
+  sessionStorage.setItem('pmc_user',id);
+  applyRole(user.role,id);
+  document.getElementById('loginOverlay').classList.add('hidden');
+  document.body.classList.remove('locked');
+}
+
+function applyRole(role,userId){
+  currentRole=role;
+  const tabs=ROLE_TABS[role]||[];
+  // 탭 표시/숨김
+  document.querySelectorAll('.nav-item').forEach(function(el){
+    var t=el.getAttribute('data-t');
+    el.style.display=tabs.indexOf(t)>=0?'':'none';
+  });
+  // 패널 숨김 (허용되지 않은 탭)
+  document.querySelectorAll('.pn').forEach(function(el){
+    if(tabs.indexOf(el.id)<0){el.style.display='none';}
+    else{el.style.display='';}
+  });
+  // 첫 번째 허용 탭 활성화
+  var firstTab=document.querySelector('.nav-item[data-t="'+tabs[0]+'"]');
+  if(firstTab) showTab(tabs[0],firstTab);
+  // 로그아웃 버튼 + 사용자 표시
+  updateUserUI(userId,role);
+}
+
+function updateUserUI(userId,role){
+  var existing=document.getElementById('userInfo');
+  if(existing)existing.remove();
+  var hdr=document.querySelector('.hdr-r');
+  if(!hdr)return;
+  var roleLabel={admin:'관리자',manager:'매니저',viewer:'뷰어'};
+  var nameLabel={admin:'관리자',ceo:'대표이사',vice_president:'부사장',manager:'매니저',viewer:'뷰어'};
+  var span=document.createElement('span');
+  span.id='userInfo';
+  span.innerHTML='<span class="user-tag">'+userId+' ('+(nameLabel[userId]||roleLabel[role]||role)+')</span><button class="btn-logout" onclick="doLogout()">로그아웃</button>';
+  hdr.appendChild(span);
+}
+
+function doLogout(){
+  sessionStorage.removeItem('pmc_role');
+  sessionStorage.removeItem('pmc_user');
+  currentRole=null;
+  var ui=document.getElementById('userInfo');if(ui)ui.remove();
+  document.body.classList.add('locked');
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  document.getElementById('loginId').value='';
+  document.getElementById('loginPw').value='';
+  document.getElementById('loginErr').textContent='';
+  // 모든 탭/패널 숨김
+  document.querySelectorAll('.nav-item').forEach(function(el){el.style.display='none';});
+  document.querySelectorAll('.pn').forEach(function(el){el.className='pn';});
+}
+
+// 페이지 로드 시 세션 체크
+(function(){
+  var role=sessionStorage.getItem('pmc_role');
+  var userId=sessionStorage.getItem('pmc_user');
+  if(role&&ROLE_TABS[role]){
+    currentRole=role;
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.body.classList.remove('locked');
+    // DOM 로드 후 역할 적용
+    if(document.readyState==='loading'){
+      document.addEventListener('DOMContentLoaded',function(){document.body.classList.remove('locked');applyRole(role,userId);});
+    }else{
+      setTimeout(function(){applyRole(role,userId);},0);
+    }
+  }
+})();
+</script>
 
 <script>
 function showTab(t,el){
@@ -171,7 +316,7 @@ function showSub(s,el){
 </script>
 <header><div class="hdr">
   <h1><span class="logo">P</span>PMC사업본부 종합현황 대시보드</h1>
-  <div class="hdr-r"><span class="vat-tag">⚠ 모든 금액 VAT 제외</span><span class="date-tag">📅 2026.04.13 업데이트</span></div>
+  <div class="hdr-r"><span class="vat-tag">⚠ 모든 금액 VAT 제외</span><span class="date-tag">📅 2026.04.13 기준</span></div>
 </div></header>
 
 <div class="nav-wrap"><div class="nav" id="mainNav">
@@ -191,8 +336,8 @@ function showSub(s,el){
 <div class="pn on" id="overview">
   <div class="kpi-row">
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic b">📊</div><div class="kpi-lb">연간 수주 목표</div></div><div class="kpi-v">100<span class="kpi-u">억</span></div></div>
-    <div class="kpi"><div class="kpi-top"><div class="kpi-ic g">💰</div><div class="kpi-lb">수주 실적 (3건)</div></div><div class="kpi-v" style="color:var(--gr)">7.81<span class="kpi-u">억</span></div><div class="kpi-s">달성률 7.8%</div></div>
-    <div class="kpi"><div class="kpi-top"><div class="kpi-ic i">🏗️</div><div class="kpi-lb">수행 프로젝트</div></div><div class="kpi-v" style="color:var(--ac)">18<span class="kpi-u">건</span></div><div class="kpi-s">국내15 · 해외3</div></div>
+    <div class="kpi"><div class="kpi-top"><div class="kpi-ic g">💰</div><div class="kpi-lb">수주 실적 (3건)</div></div><div class="kpi-v" style="color:var(--gr)">7.81<span class="kpi-u">억</span></div><div class="kpi-s">달성률 8.6%</div></div>
+    <div class="kpi"><div class="kpi-top"><div class="kpi-ic i">🏗️</div><div class="kpi-lb">수행 프로젝트</div></div><div class="kpi-v" style="color:var(--ac)">18<span class="kpi-u">건</span></div><div class="kpi-s">국내18 · 해외0</div></div>
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic a">🔥</div><div class="kpi-lb">핵심사업 준비</div></div><div class="kpi-v" style="color:var(--am)">9<span class="kpi-u">건</span></div><div class="kpi-s">핵심 파이프라인</div></div>
   </div>
 
@@ -214,11 +359,11 @@ function showSub(s,el){
     </div>
   </div>
 
-  <div class="cd"><div class="cd-h"><h3>🏆 수주 실적</h3><span class="badge badge-g">3건 · 7.81억</span></div>
+  <div class="cd"><div class="cd-h"><h3>🏆 수주 실적</h3><span class="badge badge-g">3건 · 8.59억</span></div>
     <div class="sx"><table><thead><tr><th>발주기관</th><th>사업명</th><th>PM</th><th class="ar">수주액(억)</th><th>투찰율</th><th>수주 요인</th></tr></thead><tbody>
-      <tr><td class="tp">한국교육과정평가원</td><td>AI기반 학력진단시스템 PMO</td><td class="tp">최정문</td><td class="ar fw">4.65</td><td>80%</td><td style="max-width:260px;font-size:10.5px">AI 활용 사업특화 장표 차별화, 저가입찰 전략</td></tr>
-      <tr><td class="tp">식품의약품안전처</td><td>의약품 AI 심사 PMO</td><td class="tp">구경모</td><td class="ar fw">1.94</td><td>100%</td><td style="max-width:260px;font-size:10.5px">AI 분야 박사 PM, 과업별 상세 장표</td></tr>
-      <tr><td class="tp">성평등가족부</td><td>아이돌봄사 PMO</td><td class="tp">손진</td><td class="ar fw">1.22</td><td>80%</td><td style="max-width:260px;font-size:10.5px">5일 내 AI 제안서 완성, 연계경험 어필</td></tr>
+      <tr><td class="tp">한국교육과정평가원</td><td>AI기반 학력진단시스템, 국가기초학력지원포털 구축 2차 PMO</td><td class="tp">최정문</td><td class="ar fw">5.12</td><td>80%</td><td style="max-width:260px;font-size:10.5px">1. 작년까지 제안서 장표 작성에 있어서 기존에 사용해왔던 도형이나 그림들을 유지하고 내용만 바꾸어서 제안하</td></tr>
+      <tr><td class="tp">식품의약품안전처</td><td>의약품 AI 심사 및 산업지원 체계 구축 PMO 용역</td><td class="tp">구경모</td><td class="ar fw">2.13</td><td>0.9995</td><td style="max-width:260px;font-size:10.5px">1. 사업의 주요 과업별, 수행전략별로 김용효 대표님이 AI를 활용하여 하나하나 상세하게 장표를 구성하였고 </td></tr>
+      <tr><td class="tp">성평등가족부​</td><td>아이돌봄사 국가자격 관리시스템 구축 PMO 사업</td><td class="tp">손진</td><td class="ar fw">1.34</td><td>80%</td><td style="max-width:260px;font-size:10.5px">1. 워킹데이 기준 5일간 준비하여 제출하는 촉박한 일정속에서도 김용효 대표님이 AI를 활용한 사업에 대한 </td></tr>
     </tbody></table></div>
   </div>
 
@@ -226,13 +371,14 @@ function showSub(s,el){
     <div class="sx"><table><thead><tr><th>#</th><th>발주처</th><th>사업명</th><th class="ar">사업비(억)</th><th>PM</th><th>단계</th></tr></thead><tbody>
       <tr class="kr"><td>1</td><td class="tp">한국과학기술정보연구원</td><td>통합 바이오 데이터 분석·활용 시너지 플랫폼 구축 PMO</td><td class="ar fw">6</td><td>전은미</td><td><span class="cp cp-p">실공고</span></td></tr>
       <tr class="kr"><td>2</td><td class="tp">NIA</td><td>2026년도 AI 데이터 구축 사업관리 전문 지원</td><td class="ar fw">9.39</td><td>이용근</td><td><span class="cp cp-p">실공고</span></td></tr>
-      <tr class="kr"><td>3</td><td class="tp">한국교육학술정보원</td><td>K-에듀파인 현대화 PMO</td><td class="ar fw">56</td><td>이용근</td><td><span class="cp cp-p">실공고</span></td></tr>
-      <tr class="kr"><td>4</td><td class="tp">한국사회보장정보원</td><td>사회서비스 정보 통합관리 기반 구축 PMO</td><td class="ar fw">19.6</td><td>김의겸</td><td><span class="cp cp-p">실공고</span></td></tr>
-      <tr class="kr"><td>5</td><td class="tp">서울대학교 정보화본부</td><td>지능형 캠퍼스를 위한 차세대 네트워크망 구축 PMO</td><td class="ar fw">18.54</td><td>김경수</td><td><span class="cp cp-r">사전규격</span></td></tr>
-      <tr class="kr"><td>6</td><td class="tp">한국보건산업진흥원</td><td>국가통합바이오빅데이터 통합사업관리</td><td class="ar fw">5</td><td>전은미</td><td><span class="cp cp-r">사전규격</span></td></tr>
+      <tr class="kr"><td>3</td><td class="tp">한국교육학술정보원</td><td>어플리케이션 분산처리체계 구축을 통한 K-에듀파인 현대화 PMO</td><td class="ar fw">56</td><td>이용근</td><td><span class="cp cp-p">실공고</span></td></tr>
+      <tr class="kr"><td>4</td><td class="tp">서울대학교 정보화본부</td><td>지능형 캠퍼스를 위한 차세대 네트워크망 구축 사업 PMO</td><td class="ar fw">18.54</td><td>김경수 대표</td><td><span class="cp cp-r">사전규격</span></td></tr>
+      <tr class="kr"><td>5</td><td class="tp">한국보건산업진흥원</td><td>국가통합바이오빅데이터구축사업 통합사업관리</td><td class="ar fw">5</td><td>전은미​</td><td><span class="cp cp-p">실공고</span></td></tr>
+      <tr class="kr"><td>6</td><td class="tp">한국사회보장정보원</td><td>사회서비스 정보 통합관리 기반 구축 PMO</td><td class="ar fw">19.6</td><td>김의겸</td><td><span class="cp cp-p">실공고</span></td></tr>
       <tr class="kr"><td>7</td><td class="tp">KORAIL</td><td>KOVIS 시스템 고도화사업</td><td class="ar fw">34</td><td>최영성</td><td><span class="cp cp-n">발주예정</span></td></tr>
       <tr class="kr"><td>8</td><td class="tp">KORAIL</td><td>차세대 예약발매시스템 구축</td><td class="ar fw">32</td><td>황윤호</td><td><span class="cp cp-n">발주예정</span></td></tr>
-      <tr class="kr"><td>9</td><td class="tp">네오트랜스</td><td>신분당선 통합시스템 고도화 사업 감리(PMO포함)</td><td class="ar fw">18.7</td><td>이석배(TBD)</td><td><span class="cp cp-n">발주예정</span></td></tr>
+      <tr class="kr"><td>9</td><td class="tp">네오트랜스</td><td>신분당선 통합시스템 고도화 사업 감리 (PMO포함)</td><td class="ar fw">18.7</td><td>이석배 
+(TBD)</td><td><span class="cp cp-n">발주예정</span></td></tr>
     </tbody></table></div>
   </div>
 </div>
@@ -241,7 +387,7 @@ function showSub(s,el){
 <div class="pn" id="staff">
   <!-- KPI -->
   <div class="kpi-row">
-    <div class="kpi"><div class="kpi-top"><div class="kpi-ic b">👥</div><div class="kpi-lb">총원 (4월 1일자)</div></div><div class="kpi-v">52<span class="kpi-u">명</span></div></div>
+    <div class="kpi"><div class="kpi-top"><div class="kpi-ic b">👥</div><div class="kpi-lb">총원 (4월 1일자)일자)</div></div><div class="kpi-v">52<span class="kpi-u">명</span></div></div>
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic g">🏗️</div><div class="kpi-lb">투입</div></div><div class="kpi-v" style="color:var(--gr)">40<span class="kpi-u">명</span></div><div class="kpi-s">76.9%</div></div>
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic a">⏳</div><div class="kpi-lb">대기</div></div><div class="kpi-v" style="color:var(--am)">5<span class="kpi-u">명</span></div><div class="kpi-s">제안서 작업</div></div>
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic i">📋</div><div class="kpi-lb">관리</div></div><div class="kpi-v" style="color:var(--ac)">7<span class="kpi-u">명</span></div></div>
@@ -286,13 +432,13 @@ function showSub(s,el){
   <div class="cd"><div class="cd-h"><h3>📋 관리 인력</h3><span class="badge badge-i">7명</span></div>
     <div class="sx"><table><thead><tr><th>#</th><th>성명</th><th>직위</th><th>역할</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td class="tp">이용근</td><td>부사장</td><td>PMC 수행전략</td></tr>
-      <tr><td>2</td><td class="tp">김경수</td><td>대표</td><td>대표</td></tr>
-      <tr><td>3</td><td class="tp">이정우</td><td>상무</td><td>본부장</td></tr>
-      <tr><td>4</td><td class="tp">김용효</td><td>대표</td><td>제안서 리뷰</td></tr>
-      <tr><td>5</td><td class="tp">김용택</td><td>상무</td><td>사업관리</td></tr>
-      <tr><td>6</td><td class="tp">이상현</td><td>대리</td><td>행정업무</td></tr>
-      <tr><td>7</td><td class="tp">김재경</td><td>대리</td><td>제안서 전담</td></tr>
+      <tr><td>1</td><td class="tp">김재경</td><td>대리</td><td></td></tr>
+      <tr><td>2</td><td class="tp">이용근</td><td>부사장</td><td></td></tr>
+      <tr><td>3</td><td class="tp">김용택</td><td>상무</td><td></td></tr>
+      <tr><td>4</td><td class="tp">이정우</td><td>상무</td><td></td></tr>
+      <tr><td>5</td><td class="tp">이상현</td><td>대리</td><td></td></tr>
+      <tr><td>6</td><td class="tp">김용효</td><td>대표</td><td></td></tr>
+      <tr><td>7</td><td class="tp">김경수</td><td>대표</td><td></td></tr>
     </tbody></table></div>
   </div>
 
@@ -300,11 +446,11 @@ function showSub(s,el){
   <div class="cd"><div class="cd-h"><h3>⏳ 대기 인력</h3><span class="badge badge-a">5명</span></div>
     <div class="sx"><table><thead><tr><th>#</th><th>성명</th><th>직위</th><th>급여체계</th><th>제안서 작업 / 활동</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td class="tp">안현섭</td><td>이사</td><td>연봉제(25%)</td><td>NIA 초거대AI 확산 사업관리 (제안서 작업)</td></tr>
-      <tr><td>2</td><td class="tp">서석민</td><td>사원</td><td>연봉제(25%)</td><td>NIA 초거대AI 확산 사업관리 (제안서 작업)</td></tr>
-      <tr><td>3</td><td class="tp">김의겸</td><td>전무</td><td>연봉제(90%)</td><td>사회보장정보원 사회서비스 통합관리 (제안서 작업)</td></tr>
-      <tr><td>4</td><td class="tp">박승근</td><td>상무</td><td>연봉제(90%)</td><td>국가통합바이오빅데이터 통합사업관리 / KISTI PMO (제안 참여)</td></tr>
-      <tr><td>5</td><td class="tp">김학동</td><td>이사</td><td>연봉제(80%)</td><td>KOICA 타지키스탄 디지털전환 PMC (제안서 작업)</td></tr>
+      <tr><td>1</td><td class="tp">안현섭</td><td>이사</td><td>대기4개월간25%</td><td>2026-03-31 00:00:00</td></tr>
+      <tr><td>2</td><td class="tp">서석민</td><td>사원</td><td>대기4개월간25%</td><td>2026-03-31 00:00:00</td></tr>
+      <tr><td>3</td><td class="tp">김의겸</td><td>전무</td><td>대기3개월초과시90%</td><td></td></tr>
+      <tr><td>4</td><td class="tp">박승근</td><td>상무</td><td>대기3개월초과시90%</td><td>2026-02-28 00:00:00</td></tr>
+      <tr><td>5</td><td class="tp">김학동</td><td>이사</td><td>대기3개월초과시80%</td><td>재계약</td></tr>
     </tbody></table></div>
   </div>
 
@@ -315,7 +461,7 @@ function showSub(s,el){
   </div>
 
   <!-- 퇴사 인력 -->
-  <div class="cd" style="border-left:3px solid var(--rd)"><div class="cd-h"><h3>🚪 퇴사 인력</h3><span class="badge badge-r">1명</span></div>
+  <div class="cd" style="border-left:3px solid var(--rd)"><div class="cd-h"><h3>🚪 퇴사 인력</h3><span class="badge badge-r">0명</span></div>
     <div class="sx"><table><thead><tr><th>성명</th><th>직위</th><th>퇴사일</th><th>최종 투입 사업</th></tr></thead>
     <tbody><tr><td class="tp">박효구</td><td>이사</td><td style="color:var(--rd)">2026.03.31</td><td>돌봄 통합지원정보시스템 구축 PMO</td></tr>
     </tbody></table></div>
@@ -339,7 +485,7 @@ function showSub(s,el){
 <div class="pn" id="domestic">
   <div class="kpi-row">
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic b">📋</div><div class="kpi-lb">전체</div></div><div class="kpi-v">37<span class="kpi-u">건</span></div></div>
-    <div class="kpi"><div class="kpi-top"><div class="kpi-ic g">✅</div><div class="kpi-lb">수주</div></div><div class="kpi-v" style="color:var(--gr)">3<span class="kpi-u">건</span></div><div class="kpi-s">7.81억</div></div>
+    <div class="kpi"><div class="kpi-top"><div class="kpi-ic g">✅</div><div class="kpi-lb">수주</div></div><div class="kpi-v" style="color:var(--gr)">3<span class="kpi-u">건</span></div><div class="kpi-s">8.59억</div></div>
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic r">❌</div><div class="kpi-lb">실주</div></div><div class="kpi-v" style="color:var(--rd)">3<span class="kpi-u">건</span></div></div>
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic i">🔄</div><div class="kpi-lb">준비 중</div></div><div class="kpi-v" style="color:var(--ac)">9<span class="kpi-u">건</span></div></div>
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic a">📅</div><div class="kpi-lb">발주예정</div></div><div class="kpi-v" style="color:var(--am)">22<span class="kpi-u">건</span></div></div>
@@ -376,7 +522,8 @@ function showSub(s,el){
   </div>
   <div class="cd" style="margin-bottom:16px;border-left:3px solid var(--rd)"><div class="cd-h"><h3>⚠️ 이슈사업</h3><span class="badge badge-r">1건</span></div>
     <div class="sx"><table><thead><tr><th>프로젝트</th><th>발주기관</th><th>PM</th><th>이슈 내용</th></tr></thead><tbody>
-      <tr><td class="tp">정보시스템 유지관리 전략수립</td><td>한국전력거래소</td><td>고경철</td><td style="color:var(--rd);font-size:11px">공수 초과투입(152.5%), PM 교체(안기상→고경철)</td></tr>
+      <tr><td class="tp">정보시스템 유지관리 및 조직
+운영전략 수립용역</td><td>한국전력거래소</td><td>고경철</td><td style="color:var(--rd);font-size:11px"></td></tr>
     </tbody></table></div>
   </div>
   <div class="cd"><div class="cd-h"><h3>수행 중인 프로젝트</h3><span class="badge badge-i">18건 · ▼ 클릭하여 진행현황 확인</span></div>
@@ -523,15 +670,17 @@ function tog(id){var r=document.getElementById(id);if(!r)return;r.classList.togg
 
 // ═══ DATA: 핵심사업 준비 ═══
 const KEY=[
-{n:1,org:"한국과학기술정보연구원",name:"통합 바이오 데이터 분석·활용 시너지 플랫폼 구축 PMO",amt:"6",pm:"전은미",stg:"실공고",cls:"cp-p",st:"인력 배정 완료",pct:100,d:{req:"- 가급적 정보화 프로젝트 경험이 있는 전문 기술 인력으로 구성\n- (권고사항) 바이오분야 PMO 프로젝트 수행 경험자",team:"총 9명 (57MM)\n- PM : 전은미 (30MM)\n- 사업/품질관리 : 이범철 (18.75MM)\n- FP산정 : 윤웅 (0.50MM)\n- 성능테스트 : 박노완 (0.50MM)\n- 기능테스트 : 변석균, 김주홍, 김현우 (2.00MM)\n- AA : 박진용 (1.0MM)\n- DA : 황재석 (1.00MM)\n- TA/SA(클라우드) : 박창재 (1.25MM)\n- UI/UX : 진승환 (1.00MM)",str:"- 제안전략 1차 도출 (3.30 완료)\n- 염민선 박사 (前 KISTI 단장 출신) 미팅 완료\n- Kick-Off 미팅 실시",etc:"- 통합 바이오 ISP수립 IT컨설팅 수행\n- 바이오 빅데이터 플랫폼 구축 PMO 수행중\n- KISCA 바이오 감리 수행\n- 담당자 : 디지털바이오컴퓨팅연구단 이용호"}},
-{n:2,org:"NIA",name:"2026년도 AI 데이터 구축 사업관리 전문 지원",amt:"9.39",pm:"이용근",stg:"실공고",cls:"cp-p",st:"제안서 작성 중 (30%)",pct:100,d:{req:"- 인원구성 요건 : PM 1명, 전문인력 3명, 지원인력 1명 이상",team:"1. PM : 이용근 [배정완료]\n2. 사업관리/CMS운영 : 안현섭 [배정완료]\n3. 품질관리/발주처지원 : 서석민 [배정완료]\n4. 현장점검 : 남수찬 [배정완료]\n5. 현장점검 : 박태훈 [배정완료]\n6. 현장점검 : 정연수 [배정완료]\n7. 현장점검 : 이인주 [배정완료]\n8. 사업예산관리 : 이창수 [배정완료]\n9. 통합헬프데스크 : 김재경 [배정완료]\n10. 고용현황관리 : 이상현 [배정완료]\n11. 개인정보 탐지 : 정근화 [배정완료]\n12. 데이터 품질 : 김현덕 [배정완료]\n(12명 전원 배정 완료)",str:"- 인력 12명 전원 배정 완료\n- 제안서 작성 중 (30%)",etc:"- 담당자 : AI데이터사업팀 조연제 선임"}},
-{n:3,org:"한국교육학술정보원",name:"어플리케이션 분산처리체계 구축을 통한 K-에듀파인 현대화 PMO",amt:"56",pm:"이용근",stg:"실공고",cls:"cp-p",st:"인력 배정 완료",pct:100,d:{req:"- PM 요건 : 사업공고일 전부터 12개월 이상 재직\n- 전체 투입인력 70% 이상 6개월 이상 자사 인력\n- 기존 업무 이해도 최우선 고려",team:"상주 9명, 비상주 25명 (총 34명)\n1. PM : 이용근 기술사 [배정완료]\n2. 사업관리 : 장덕수 [섭외중]\n3. FP전문가 : 윤웅 [배정완료]\n4. 테스트팀 : 김솔지 외 2명 [섭외중]\n5. 리스크관리 : 이호득 기술사 [섭외중]\n6. 운영진단 : 장영철 기술사 [배정완료]\n7. BA(재정/행정) : 최수연 [배정완료]\n8. AA(재정) : 이경민 [자사화예정]\n9. DA(재정) : 김경수 이사 [섭외중]\n10. 교육행정 : 김두연 박사 [배정완료]\n11. 교육재정 : 박은주 세무사 [배정완료]\n12. 회계사 : 서병도 기술사\n13. AA(행정) : 전은미 [배정완료]\n14. 문서관리(ODF) : TBD [배정완료]\n15. TA(HW) : 이주하 [배정완료]\n16. TA(시스템SW) : 정옥영 [섭외중]\n17. 클라우드 : 김경수 대표 [섭외중]\n18. 인프라 점검 : 황창환(총괄센터,DR) [배정완료]\n19~24. 권역별 점검자 : 김종민,김태섭,양제연,이병욱,인규민,전재필\n25. 통신기술사 : 윤성한 [섭외중]\n26. 스토리지설계 : TBD [섭외중]\n27. SDS전문가 : 권영식 [배정완료]\n28. DA(행정,이관) : 최상훈 [배정완료]\n29. 데이터이관 : 한병식\n30. 데이터품질진단 : 명일구\n31. 재해복구센터 : 선승호 박사\n32. BCP : 정영환 (한국BCP협회장)\n33. SA : 박승민\n34. 보안전문가 : 이청영",str:"- 회장님 주재 RFP 검토 회의 완료\n- '23년 쌍용정보통신 제안서 입수 완료\n- 제안요청 설명회 : 2026.4.7 14:00~16:00 (온라인)\n- 접수 : 2026.4.1 18:00까지 이메일 제출",etc:"- 담당자 : 재정시스템고도화부 부장 서영석\n- 재정시스템고도화부 담당 김소영\n- 상주 9명, 비상주 25명 구성"}},
-{n:4,org:"한국사회보장정보원",name:"사회서비스 정보 통합관리 기반 구축 PMO",amt:"19.6",pm:"김의겸",stg:"사전규격",cls:"cp-r",st:"인력 배정 90%",pct:90,d:{req:"- 인력편성 (안) : 총 24명 (177.70MM)",team:"[사회서비스 정보 통합관리 · 13명 (67.70MM)]\nPMO PM : 김의겸 (19MM) [배정완료]\n사회서비스 전문가(BA) : 임근찬/오동석 (15.20MM) [배정완료]\nAI전문가(LLM&RAG) : 구경모 (7MM) [배정완료]\n공간정보체계 : 안규태 [배정완료]\nCloud Native(MSA) : 김경수 (4MM) [배정완료]\n성능테스트 : 박노완 (0.50MM) [배정완료]\n기능테스트 : 김솔지 등 5명 (2.50MM) [배정완료]\n데이터 품질진단 : 김용갑 (3.50MM) [배정완료]\n시스템 운영진단 : 장영철 (0.50MM) [배정완료]\n데이터 이관 : 남봉기 (3MM) [배정완료]\n보안전문가(ZeroTrust) : 이주하 (1.50MM) [배정완료]\nAPI 연계/통합 : 윤웅 (6MM) [배정완료]\nUI/UX : 이일수 (3MM) [배정완료]\nFP적정성 검토 : 박태근 (2MM) [배정완료]\n\n[전자바우처·통계정보시스템 통합 · 6명 (62MM)]\nPL : 박진용 (18MM) [배정완료]\n전자바우처 AA (15.50MM) [배정 중]\n통계정보통합 AA (15.50MM) [배정 중]\nDA : 양지열 (7.50MM) [배정완료]\nTA : 윤준하 (3.50MM) [배정완료]\nSA : 박을용 (2MM) [배정완료]\nEDW전문가 : 정옥영 [배정완료]\n개인정보영향평가 : 권병섭 [배정완료]\n\n[사회서비스 분야 개별시스템 통합 · 5명 (48MM)]\nPL : 김학동 (18MM) [배정완료]\n사회서비스통합 AA (16.50MM) [배정 중]\nDA : 김종현 (10.50MM) [배정완료]\nTA (1.75MM) [배정 중]\nSA : 조준영 (1.25MM) [배정완료]",str:"- 사전규격 공개 완료\n- 사업규모 : 20,600,111,000원\n- 대부분 인력 배정 완료, AA 3명 섭외 중",etc:"- PM 김의겸"}},
-{n:5,org:"서울대학교 정보화본부",name:"지능형 캠퍼스를 위한 차세대 네트워크망 구축 사업 PMO",amt:"18.5",pm:"김경수",stg:"사전규격",cls:"cp-r",st:"인력 배정 완료",pct:100,d:{req:"- 공동수급체 대표자 소속, 입찰공고일 전~평가일까지 재직자",team:"총 7명 (총 61MM)\nPM : 김경수 대표 [배정완료]\n사업관리/변화관리 : 가덕 (자사화 예정) [배정예정]\n전문교육 : 김용효 [배정완료]\nPAO : 서울대 재학생 2명 [배정예정]\n통신1 : 전용성 [배정완료]\n통신2 : 김진호 [배정완료]\n통신3 : 전필호 [배정완료]\n유/무선Test : 박노완 [배정완료]\n통신장비Test : 김광헌 [배정완료]\nSA : 성인환 [배정완료]\nNA : 김광헌 [배정완료]",str:"- PPD 및 제안서 목차 작성 후 통신본부 배포 (3.25 완료)\n- 서울대 고객 VoC 청취 (3.27 완료)\n- 긴급 공고 예정\n- PMO 1명 상주 및 통신부문 적기 점검 요청",etc:"- 조달청 발주계획 : 2026/05\n- 담당자 : 정보화기획과 윤현영 nabee8@snu.ac.kr\n- 기술관련 : 이주형 decode33@snu.ac.kr"}},
-{n:6,org:"한국보건산업진흥원",name:"국가통합바이오빅데이터 통합사업관리",amt:"5",pm:"전은미",stg:"사전규격",cls:"cp-r",st:"배정 진행중",pct:25,d:{req:"- PM은 입찰공고일 6개월 이전부터 재직자\n- 핵심인력은 자사인력 필수",team:"총 5명 (상주1명, 비상주 4명) 20MM\n- PM (총괄관리) : 전은미 (8.0MM) [배정완료]\n- 관리지원 (품질/성과) : 1명 (6.0MM) [섭외 중]\n- 기술지원 (아키텍처/연계) : 1명 (4.0MM) [섭외 중]\n- 비상주 전문가 (AI/데이터/보안) : 2명 (2.0MM) [섭외 중]",str:"- 나라장터 발주계획 공개\n- 내부 전문가 현황 확인 완료\n- KISTI 바이오 감리 경험자 다수 보유",etc:"- 관련사업 : 바이오빅데이터 상세기획(제이씨디에이), 기획수정(날리지웍스), AI기획(테크노베이션)\n- 담당자 : 송지현 043-713-8353"}},
-{n:7,org:"KORAIL",name:"KOVIS 시스템 고도화사업",amt:"34",pm:"최영성",stg:"발주예정",cls:"cp-n",st:"배정 중",pct:0,d:{req:"- 인력 편성 (안) : 총 10명 (상주 4명, 비상주 6명) (174MM)",team:"1. PM : 유재광 (24MM)\n2. 사업관리 : 한창근 (24MM)\n3. AA : 조명식 (24MM)\n4. TA : 신현기 (24MM)\n5. DA : 양동규 (18MM)\n6. 영상설비 : 이우현 (16MM)\n7. 테스트/검증 : 박창호 (14MM)\n8. 기능점수 : 박종원 (10MM)\n9. SW보안 : 안영근 (10MM)\n10. 인프라/성능 : 김광헌 (10MM)\n(전원 배정 중)",str:"- 철도 업무 종사자 소싱 중",etc:"- 4~5월 발주 예정"}},
-{n:8,org:"KORAIL",name:"차세대 예약발매시스템 구축",amt:"32",pm:"황윤호",stg:"발주예정",cls:"cp-n",st:"배정 중",pct:0,d:{req:"- 인력 편성 (안) : 총 10명 (상주 4명, 비상주 6명) (175MM)",team:"1. PM(PMO 총괄) : 이관형 (24MM)\n2. 사업관리 : 장영철 (24MM)\n3. BA(승차권) : 이석배 (24MM)\n4. BA(응용) : 이종혁 (24MM)\n5. AA(보안) : 신현기 (16MM)\n6. DA : 양동규 (16MM)\n7. TA : 김영철 (14MM)\n8. 기능점수 : 박종원 (12MM)\n9. SW보안 : 안영근 (11MM)\n10. 개인정보 : 강정원 (10MM)\n(전원 배정 중)",str:"- 유지보수 업체 인력 소싱 중\n- 구축 : 삼성SDS\n- 소싱 대상 : 네이버시스템, 유플러스아이티(U+ IT), 케이원정보기술",etc:"- 6월 발주 예정"}},
-{n:9,org:"네오트랜스",name:"신분당선 통합시스템 고도화 사업 감리 (PMO포함)",amt:"18.7",pm:"이석배(TBD)",stg:"발주예정",cls:"cp-n",st:"RFP 지원 중",pct:10,d:{req:"- PM 배정 : 이석배 (신분당선 등 9건 수행경험)",team:"총 5명 (95.5MM)\n1. PM : 이석배 (24.0MM) [배정 중]\n2. 사업관리 : 한창근 (24.0MM) [배정 중]\n3. AA : 조명식 (18.0MM) [배정 중]\n4. DA : 양동규 (16.0MM) [배정 중]\n5. TA : 신현기 (15.5MM) [배정 중]",str:"- RFP 작성 지원 중\n- 이종국 상무(감리) + 이정우 상무(PMO) 착수\n- ISP : KCC 정보통신 수행\n- 제안요청서 작성 지원 중",etc:"- 발주 지연 예정 (ISMP 선행)\n- ISP 수행사 : KCC 정보통신"}}
+{n:1,org:"한국과학기술정보연구원",name:"통합 바이오 데이터 분석·활용 시너지 플랫폼 구축 PMO",amt:"6",pm:"전은미",stg:"실공고",cls:"cp-p",st:"- 가급적 정보화 프로젝트 경험이 있는 전문 기술 인력",pct:0,d:{req:"- PM요건",team:"- 가급적 정보화 프로젝트 경험이 있는 전문 기술 인력으로 구성
+- (권고사항) 바이오분야 PMO 프로젝트 수행 경험자",str:"",etc:""}},
+{n:2,org:"NIA",name:"2026년도 AI 데이터 구축 사업관리 전문 지원",amt:"9.39",pm:"이용근",stg:"실공고",cls:"cp-p",st:"준비 중",pct:0,d:{req:"- 인원구성 요건 : PM 1명 이상 투입, 전문인력 3명 이상, 지원인력 1명 이상",team:"",str:"",etc:""}},
+{n:3,org:"한국교육학술정보원",name:"어플리케이션 분산처리체계 구축을 통한 K-에듀파인 현대화 PMO",amt:"56",pm:"이용근",stg:"실공고",cls:"cp-p",st:"OK",pct:0,d:{req:"- PM 요건 : 사업공고일 전부터 12개월 이상 제안사에 재직 중인 직원",team:"",str:"OK",etc:""}},
+{n:4,org:"서울대학교 정보화본부",name:"지능형 캠퍼스를 위한 차세대 네트워크망 구축 사업 PMO",amt:"18.54",pm:"김경수 대표",stg:"사전규격",cls:"cp-r",st:"배정 완료",pct:100,d:{req:"- PM 요건",team:"공동수급체 대표자 소속 임직원으로서, 입찰공고일 전부터 제안서 평가일까지 계속 재직 중인 자",str:"배정 완료",etc:""}},
+{n:5,org:"한국보건산업진흥원",name:"국가통합바이오빅데이터구축사업 통합사업관리",amt:"5",pm:"전은미​",stg:"실공고",cls:"cp-p",st:"배정 완료",pct:100,d:{req:"- PM 구성 조건",team:"- PM은 반드시 제안사 소속 임직원이어야 하며, 입찰공고일 6개월 이전부터 제안서 평가일까지 계속 재직 중인 자",str:"배정 완료",etc:""}},
+{n:6,org:"한국사회보장정보원",name:"사회서비스 정보 통합관리 기반 구축 PMO",amt:"19.6",pm:"김의겸",stg:"실공고",cls:"cp-p",st:"준비 중",pct:0,d:{req:"- 인력 편성 (안) : 총 24명 (177.70MM)",team:"",str:"",etc:""}},
+{n:7,org:"KORAIL",name:"KOVIS 시스템 고도화사업",amt:"34",pm:"최영성",stg:"발주예정",cls:"cp-n",st:"준비 중",pct:0,d:{req:"- 인력 편성 (안) : 총 10명 (상주 4명, 비상주 6명) (174MM)",team:"",str:"",etc:""}},
+{n:8,org:"KORAIL",name:"차세대 예약발매시스템 구축",amt:"32",pm:"황윤호",stg:"발주예정",cls:"cp-n",st:"준비 중",pct:0,d:{req:"- 인력 편성 (안) : 총 10명 (상주 4명, 비상주 6명) (175MM)",team:"",str:"",etc:""}},
+{n:9,org:"네오트랜스",name:"신분당선 통합시스템 고도화 사업 감리 (PMO포함)",amt:"18.7",pm:"이석배 
+(TBD)",stg:"발주예정",cls:"cp-n",st:"섭외 중",pct:0,d:{req:"- PM 배정",team:"- PM 후보 : 이석배 (신분당선 통합정보시스템 구축, 차세대 여객영업시스템 구축, 광역정보센타 구축, 대전도시철도 통합MIS구축, 인천공항철도 포털시스템 재구축 등 9건 수행)",str:"섭외 중",etc:""}}
 ];
 const kt=document.getElementById('keyTbl');
 KEY.forEach((k,i)=>{let pc=k.pct;let pcl=pc>=80?'#10b981':pc>=50?'#e8930c':'#e53e3e';if(pc===0)pcl='#8898aa';
@@ -554,20 +703,29 @@ kt.innerHTML+=`<tr>
 // ═══ DATA: 국내 제안현황 ═══
 const DOM=[
 [1,"한국교육과정평가원","AI기반 학력진단시스템, 국가기초학력지원포털 구축 2차 PMO",6.39,"최정문","백광호","조달평가","수주","80%","개찰완료",false],
-[2,"KOTRA","방글라데시 NSEZ 스마트 신도시·산업단지 개발 로드맵 검토",2.94,"고경철","박효구,김재경","자체평가","실주","85%","개찰완료",false],
-[3,"식품의약품안전처","의약품 AI 심사 및 산업지원 체계 구축 PMO 용역",2.13,"구경모","김의겸,김용효,김재경","서면/조달","수주","100%","개찰완료",false],
-[4,"법무부","전송형 전자영장 집행시스템 구축 PMO",4.63,"최상훈","유동화,박영배","서면/조달","실주","99.9%","개찰완료",false],
-[5,"한국개발연구원","이탈리아 정책자문사업",3.37,"한용호","김재경,이병식,서수경","자체평가","실주","80%","개찰완료",false],
-[6,"성평등가족부","아이돌봄사 국가자격 관리시스템 구축 PMO",1.68,"손진","김용효,김의겸,김학동,김재경","조달평가","수주","80%","개찰완료",false],
-[7,"한국과학기술정보연구원","통합 바이오 데이터 분석·활용 시너지 플랫폼 구축 PMO",6,"전은미","김용효,이동원,김재경","자체평가","준비 중","-","실공고",true],
-[8,"NIA","2026년도 AI 데이터 구축 사업관리 전문 지원",9.39,"이용근","안현섭,서석민","조달평가","준비 중","-","실공고",true],
-[9,"한국교육학술정보원","K-에듀파인 현대화 PMO",56,"이용근","김용효,유재련,양제연","자체평가","준비 중","-","실공고",true],
-[10,"한국사회보장정보원","사회서비스 정보 통합관리 기반 구축 PMO",19.6,"김의겸","김용효,김학동,김재경","","준비 중","-","실공고",true],
-[11,"서울대학교 정보화본부","지능형 캠퍼스를 위한 차세대 네트워크망 구축 PMO",18.5,"김경수","김경수,전용성,김진호,전필호,박노완,김광헌,성인환","자체평가","준비 중","-","사전규격",true],
-[12,"한국보건산업진흥원","국가통합바이오빅데이터 통합사업관리",5,"전은미","전은미,김용효,김재경","자체평가","준비 중","-","사전규격",true],
-[13,"KORAIL","KOVIS 시스템 고도화사업",34,"최영성","최영성,권순열,정옥영,김용효","","준비 중","-","발주예정",true],
-[14,"KORAIL","차세대 예약발매시스템 구축",32,"황윤호","황윤호,전은미,정옥영,김용효","","준비 중","-","발주예정",true],
-[15,"네오트랜스","신분당선 통합시스템 고도화 사업 감리(PMO포함)",18.7,"이석배(TBD)","황윤호,전은미,정옥영,김용효","","준비 중","-","발주예정",true]
+[2,"KOTRA","방글라데시 NSEZ 스마트 신도시·산업단지 개발 로드맵 검토 및 분야별 프로젝트 제안",2.94,"고경철","박효구,김재경","자체평가","실주","85%","개찰완료",false],
+[3,"식품의약품안전처","의약품 AI 심사 및 산업지원 체계 구축 PMO 용역",2.13,"구경모","김의겸,김용효,김재경","서면평가,
+조달평가","수주","0.9995","개찰완료",false],
+[4,"법무부","전송형 전자영장 집행시스템 구축 PMO",4.63,"최상훈","유동화,박영배","서면평가,
+조달평가","실주","0.999","개찰완료",false],
+[5,"한국개발연구원","「2025/26년 경제발전경험공유사업」이탈리아 정책자문사업",3.37,"한용호","김재경,이병식,서수경","자체평가","실주","0.8","개찰완료",false],
+[6,"성평등가족부​","아이돌봄사 국가자격 관리시스템 구축 PMO 사업",1.68,"손진","김용효,김의겸,김학동,김재경","조달평가","수주","80%","개찰완료",false],
+[7,"한국과학기술정보연구원","통합 바이오 데이터 분석·활용 시너지 플랫폼 구축 PMO",6,"전은미","김용효,이동원,
+김학동,김재경","자체평가","준비 중","-","실공고",true],
+[8,"한국지능정보사회진흥원","2026년도 AI 데이터 구축 사업관리 전문 지원",9.39,"이용근/안현섭","안현섭,서석민","조달평가","준비 중","-","실공고",true],
+[9,"한국교육학술정보원","어플리케이션 분산처리체계 구축을 통한 K-에듀파인 현대화 PMO",56,"이용근","김용효,유재련,양제연","조달평가","준비 중","-","실공고",true],
+[10,"서울대학교 정보화본부","지능형 캠퍼스를 위한 차세대 네트워크망 구축 사업 PMO",18.54,"김경수/황윤호","김경수, 이상현 김상주, 임종헌","자체평가","준비 중","-","사전규격",true],
+[11,"한국보건산업진흥원","국가통합바이오빅데이터구축사업 통합사업관리",5,"이동원/전은미","전은미, 이동원 
+김용효, 김재경​","자체평가","준비 중","-","실공고",true],
+[12,"한국사회보장정보원","사회서비스 정보 통합관리 기반 구축 사업관리 위탁(PMO) 용역",19.6,"김의겸","김용효,김학동,
+김재경","조달평가","준비 중","-","실공고",true],
+[13,"KORAIL","KOVIS 시스템 고도화사업",34,"최영성","최영성, 권순열
+정옥영, 김용효​","","준비 중","-","발주예정",true],
+[14,"KORAIL","차세대 예약발매시스템 구축",32,"황윤호","황윤호, 전은미 
+정옥영, 김용효​","","준비 중","-","발주예정",true],
+[15,"네오트랜스","신분당선 통합시스템 고도화 사업 감리 (PMO포함)",18.7,"이석배 
+(TBD)","황윤호, 전은미 
+정옥영, 김용효​","","준비 중","-","발주예정",true]
 ];
 const dt=document.getElementById('domTbl');
 DOM.forEach(d=>{const c=d[7]==='수주'?'cp-w':d[7]==='실주'?'cp-l':'cp-p';const stg_cls=d[9]==='개찰완료'?'cp-c':d[9]==='실공고'?'cp-p':d[9]==='사전규격'?'cp-r':'cp-n';const isKey=d[10];
@@ -577,18 +735,22 @@ dt.innerHTML+=`<tr${isKey?' class="kr"':''}><td>${d[0]}</td><td class="tp">${d[1
 
 // ═══ DATA: 국내 발주예정 ═══
 const DU=[
-[1,"한국산업은행","KDB Paper-Less 시스템 구축사업 PMO",10,"4월 예정","",""],
-[2,"한국사회보장정보원","돌봄 통합지원정보시스템 구축 PMO",7.1,"4월 예정","",""],
-[3,"안산시","강소형 스마트도시 PMO",5.0,"4월 예정","황윤호","김정환,이병성"],
-[4,"태백시","강소형 스마트도시 조성사업 PMO",3.0,"4월 예정","황윤호","김정환,이병성"],
-[5,"한국부동산원","한국부동산원 PMO 사업",1.5,"4월 예정","미정","-"],
-[6,"자동차손해배상진흥원","자동차사고 경상환자 장기치료 분쟁조정 시스템 구축 PMO","미정","4~6월 예정","",""],
-[7,"NIA","공공부문 이용 AI-SaaS 개발검증사업",5.0,"6월 예정","박효구","정준화,박영배"],
-[8,"KORAIL","RAIL AI 허브 구축",13.8,"6월 예정","","-"],
-[9,"행정안전부","차세대 지방행정공통시스템 구축 PMO",70,"7월 예정","이용근/김의겸","이정우,김장원"],
-[10,"경기주택공사","MIS 재구축 PMO 용역",11.8,"10월 예정","전은미","-"],
-[11,"강원랜드","강원랜드 CMS 2.0 구축 PMO",10,"27. 1월 예정","전은미","-"],
-[12,"기획재정부","공공업무시스템 유지/운영관리 및 기능개선 PMO","미정","미정","",""],
+[1,"한국산업은행","KDB Paper-Less 시스템 구축사업 PMO",10,"4월 예정 예정","",""],
+[2,"한국사회보장정보원","돌봄 통합지원정보시스템 구축 PMO",7.1,"4월 예정 예정","",""],
+[3,"안산시​​","강소형 스마트도시 PMO ​​​​",5,"4월 예정 예정","황윤호","김정환
+이병성"],
+[4,"태백시​​","강소형 스마트도시 조성사업 PMO ​​",3,"4월 예정 예정","황윤호","김정환
+이병성"],
+[5,"한국부동산원","한국부동산원 PMO 사업",1.5,"4월 예정 예정","고객 미팅  후 배정여부 결정 예정","-"],
+[6,"자동차손해배상진흥원","자동차사고 경상환자 장기치료 분쟁조정 시스템 구축 PMO","미정","4~6월 예정 예정","",""],
+[7,"KORAIL","RAIL AI 허브 구축",13.8,"6월 예정 예정","","-"],
+[8,"NIA","공공부문 이용 AI-SaaS 개발검증사업​​",5,"6월 예정 예정","박효구","정준화
+박영배"],
+[9,"행정안전부","차세대 지방행정공통시스템 구축 PMO",70,"7월 예정 예정","이용근/김의겸","이정우
+김장원"],
+[10,"경기주택공사","MIS 재구축 PMO 용역",11.8,"10월 예정 예정","전은미","-"],
+[11,"강원랜드","강원랜드 CMS 2.0 구축 PMO",10,"27. 1월 예정 예정","박승근","-"],
+[12,"기획재정부​","2025-2027년 공공업무시스템 유지/운영관리 및 기능개선 PMO","미정","미정","",""],
 [13,"국방","국방안전관리정보체계 구축사업 PMO",6.4,"미정","",""],
 [14,"국방","육군 전술정보데이터 품질관리시스템 PMO",7.4,"미정","",""],
 [15,"국방","종합보급창 스마트물류센터 정보체계 구축 PMO",8.5,"미정","",""],
@@ -598,7 +760,7 @@ const DU=[
 [19,"국방","여단급 과학화 전투훈련체계 경미한 성능개량 사업 PMO","미정","미정","",""],
 [20,"국방","다출영상융합체계 구축 사업 PMO","미정","미정","",""],
 [21,"국방","합동지휘통제체계 경미한 성능개량 사업 PMO","미정","미정","",""],
-[22,"국방","정보작적모의모델 체계개발 사업 PMO","미정","미정","",""]
+[22,"국방","정보작적모의모델 체계개발 사업 PMO_\'25.4","미정","미정","",""]
 ];
 const dut=document.getElementById('domUpTbl');
 DU.forEach(d=>{dut.innerHTML+=`<tr><td>${d[0]}</td><td class="tp">${d[1]}</td><td style="max-width:220px">${d[2]}</td><td class="ar fw">${d[3]}</td><td>${d[4]}</td><td class="tp">${d[5]}</td><td style="font-size:10.5px">${d[6]}</td></tr>`;});
@@ -607,22 +769,27 @@ DU.forEach(d=>{dut.innerHTML+=`<tr><td>${d[0]}</td><td class="tp">${d[1]}</td><t
 
 // ═══ DATA: 해외 제안준비 ═══
 const OVS=[
-[1,"KOICA","인도네시아","인도네시아 국가사무처 디지털 전환 마스터플랜 수립 및 역량강화 PMC",39.68,"이상훈(외부)","개찰완료","실주"],
-[2,"KOTRA","방글라데시","방글라데시 NSEZ 스마트 신도시·산업단지 개발 로드맵",2.94,"고경철","개찰완료","실주"],
-[3,"KOICA","이탈리아","이탈리아 정책자문사업(KSP)",3.37,"한용호(외부)","개찰완료","실주"],
-[4,"KOICA","타지키스탄","타지키스탄 정부기능 디지털 전환 이행 지원사업 PMC",60.3,"넥스트아이앤아이","접수","준비 중"],
-[5,"KOICA","도미니카 공화국","도미니카공화국 카리브해 해조류(모자반) 재해 대응 및 관리 역량강화 사업 PMC",70.57,"","발주예정","준비 중"],
-[6,"KOICA","콜롬비아","콜롬비아 반부패 포털(PACO) 고도화 투명성 강화 PMC",41,"","발주예정","발주예정"],
-[7,"KOICA","에티오피아","에티오피아 무역활성화를 위한 통합 관세행정 시스템 구축 PMC",16.1,"","발주예정","발주예정"],
-[8,"KOICA","네팔","네팔 기후탄력적 벼품종 재배 및 쌀생산량 증대사업 PMC",141,"","발주예정","발주예정"],
-[9,"KOICA","파라과이","파라과이 소농 기후변화 적응력 강화사업 PMC",124,"","발주예정","발주예정"],
-[10,"KOICA","파라과이","파라과이 아순시온 통합관제 공공안전 마스터플랜 PMC",43,"","발주예정","발주예정"],
-[11,"KOICA","라오스","라오스 D-HRD센터 설립사업 PMC",34,"","발주예정","발주예정"],
-[12,"KOICA","필리핀","필리핀 K-DID 시스템 구축 PMC",124,"","발주예정","발주예정"],
-[13,"KOICA","필리핀","필리핀 사법 디지털화 및 역량강화 PMC",33.1,"","발주예정","발주예정"],
-[14,"KOICA","인도네시아","인도네시아 벼생산성 향상 쌀혁신센터 PMC",132,"","발주예정","발주예정"],
-[15,"KOICA","베트남","베트남 감염병 감시정보시스템 구축 PMC",45,"","발주예정","발주예정"],
-[16,"KOICA","우간다","우간다 감염병 예방 및 대응체계 강화 PMC",5,"","발주예정","발주예정"]
+[1,"KOICA","인도네시아","인도네시아 국가사무처 디지털 전환 기반 구축을 위한 마스터플랜 수립 및 역량강화 사업 PMC 용역",39.68,"이상훈
+（외부인력）","개찰완료","실주"],
+[2,"KOTRA (EIPP)","방글라데시","방글라데시 NSEZ 스마트 신도시·산업단지 개발 로드맵 검토 및 분야별 프로젝트 제안",2.94,"고경철","개찰완료","실주"],
+[3,"KOICA","타지키스탄","타지키스탄 정부기능 디지털 전환 이행 지원사업 PMC 용역",60.3,"넥스트
+아이앤아이","접수","준비 중"],
+[4,"KOICA","이탈리아","「2025/26년 경제발전경험공유사업(KSP)」이탈리아 정책자문사업",3.37,"한용호(외부)","개찰완료","실주"],
+[5,"KOICA","필리핀","필리핀 사이버 위기대응 역량강화를 위한 국가사이버안전센터 구축사업 PMC 용역",44.75,"","불참","불참"],
+[6,"KOICA","카자흐스탄","카자흐스탄 알라타우 신도시 스마트타운 마스터플랜 수립",8,"","불참","불참"],
+[7,"KOICA","폴란드","폴란드 루블린 스마트시티 마스터플랜 수립 및 통합관제센터 구축계획",7,"","불참","불참"],
+[8,"KOICA","도미니카 공화국","도미니카공화국 카리브해 해조류(모자반) 재해 대응 및 관리 역량강화 사업 PMC 용역",70.57,"","사전규격",""],
+[9,"KOICA","콜롬비아","콜롬비아 반부패 포털(PACO) 고도화를 통한 투명성 강화 사업 PMC",41,"","발주예정",""],
+[10,"KOICA","에티오피아","에티오피아 무역활성화를 위한 통합 관세행정 시스템 구축 사업 PMC",16.1,"","발주예정",""],
+[11,"KOICA","네팔","네팔 떠라이(Terai)지역 기후탄력적 벼품종 재배 및 쌀생산량 증대사업 PMC 용역",141,"","발주예정",""],
+[12,"KOICA","파라과이","파라과이 소농의 지속가능한 기후변화 적응력 강화사업 PMC 용역",124,"","발주예정",""],
+[13,"KOICA","파라과이","파라과이 아순시온시 통합 관제 서비스 개선 및 공공안전 마스터플랜 수립 사업 PMC",43,"","발주예정",""],
+[14,"KOICA","라오스","라오스 공무원 디지털 역량강화를 위한 국립 D-HRD센터 설립사업 PMC",34,"","발주예정",""],
+[15,"KOICA","필리핀","필리핀 전자정부 신뢰성 강화를 위한 한국형 분산 신원인증(K-DID) 시스템 구축 PMC",124,"","발주예정",""],
+[16,"KOICA","필리핀","필리핀 사법 효율성 및 접근성 개선을 위한 사법 정보 디지털화 및 역량강화사업 PMC용역",33.1,"","발주예정",""],
+[17,"KOICA","인도네시아","인도네시아 한-인니 쌀혁신센터 설립을 통한 벼생산성 향상 및 쌀생산량 증대사업 PMC 용역",132,"","발주예정",""],
+[18,"KOICA","베트남","베트남 감염병 감시정보시스템 구축  및 감염병 대응 역량강화 사업 PMC",45,"","발주예정",""],
+[19,"KOICA","우간다","우간다 감염병 예방 및 대응체계 강화  사업 PMC 용역",5,"","발주예정",""]
 ];
 const ot=document.getElementById('ovsTbl');
 OVS.forEach(o=>{const c=o[7]==='실주'?'cp-l':o[7]==='준비 중'?'cp-p':o[7]==='발주예정'?'cp-r':'cp-n';
@@ -632,26 +799,36 @@ ot.innerHTML+=`<tr><td>${o[0]}</td><td class="tp">${o[1]}</td><td>${o[2]}</td><t
 
 // ═══ DATA: 수행 프로젝트 ═══
 const PRJ=[
-[1,"PMO","강원랜드 ERP 시스템구축 PMO","강원랜드","박승근","23.11~26.05",9.41,1107,97.7,"PMO 테스트 단계 점검\\n박승근 PM 철수(26.02.28)\\n잔금 33.2백만(3.9%)","김명환"],
-[2,"PMO","차세대 농업농촌통합정보시스템 PMO","농림축산식품부","이동원","23.11~26.12",17.30,1131,84.3,"2단계 오픈 안정화 점검\\n3단계 분석/통계(DW) 산출물 검토\\n잔금 17.7백만(1.1%)","정창식, 김종인, 이희만"],
-[3,"PMO","국가결산보고서개편 PMO","기획재정부","손진","24.04~26.03",3.19,1030,100,"1차오픈 미결원장 추가보완\\n전면오픈 운영점검\\n사업 종료보고 준비\\n3월 종료 예정","—"],
-[4,"PMO","AI 맞춤형 교수학습 플랫폼 PMO","NIA","황윤호","24.05~26.04",12.00,1154,99.2,"SSO 통합인증 도입 검토\\nPMO 결과보고서 작성\\n잔금 140백만(12.8%)","이주하, 인규민, 김경수"],
-[5,"PMO","차세대 온비드 구축 PMO","자산관리공사","구경모","24.08~26.04",13.63,1073,97.0,"통합테스트3차 진행\\n오픈 준비\\n잔금 409백만(30%)","박진용, 전은미, 황재석"],
-[6,"PMO","광명시 스마트도시 PMO","광명시","김정환","25.05~27.05",3.28,820,47.5,"PM교체(박영배→김정환)\\n설계단계 산출물 검토\\n잔금 98.4백만(30%)","이병성"],
-[7,"PMO","자활지원사업 통합전산망 PMO","한국자활복지개발원","이경민","25.06~26.06",1.86,729,74.1,"설계단계 산출물 점검\\n연계기관 협의\\n잔금 55.9백만(30.1%)","권순열"],
-[8,"PMO","S2B 재구축 PMO","한국교직원공제회","유재련","25.07~27.03",10.45,901,39.2,"법제도 적용사항 도출\\n설계단계 검토\\n잔금 522.5백만(50%)","이상각, 양제연, 정준화"],
-[9,"PMO","WEB-EDI 심사시스템 PMO","수협중앙회","김재호","25.07~26.08",5.05,971,90.4,"SI 설계단계 산출물 검토\\n개인정보영향평가 수행\\n잔금 151.5백만(30%)","—"],
-[10,"PMO","돌봄 통합지원정보시스템 PMO","한국사회보장정보원","유동화","25.09~26.08",4.69,1084,72.8,"수행사 역량부족→일정지연\\n돌봄 지침 미확정→요건변경 위험\\n잔금 46.9백만(10%)","정옥영, 이병욱, 이현호, 박효구"],
-[11,"컨설팅","정보시스템 유지관리 전략수립","한국전력거래소","고경철","25.07~26.03",2.81,1756,152.5,"PM교체(안기상→고경철)\\n3월 종료 목표\\n잔금 140.5백만(50%)","조형래, 김기관, 강용"],
-[12,"PMO","아이톡톡 PMO","경상남도교육청","김종민","26.01~26.12",2.50,800,9.0,"기술협상 및 계약완료\\n선수금 174.9백만 수금\\n요구정의 단계 지원","안규민"],
-[13,"PMO","AI 학력진단시스템 PMO","한국교육과정평가원","최정문","26.01~26.12",5.12,867,13.6,"기술협상 및 계약 완료\\n착수계 제출\\n잔금 511.5백만(100%)","김기관, 김태섭, 이희만"],
-[14,"PMO","의약품 AI심사 PMO","식약처","구경모","26.03~26.12",2.13,926,4.3,"기술협상 및 계약 완료\\n착수계 제출\\n선수금 149백만(30%) 수금\\n잔금 63.9백만(30%)","윤정원"],
-[15,"PMO","아이돌봄사 PMO","성평등가족부","손진","26.03~26.12",1.34,1069,0,"기술협상 및 계약 완료\\n착수계 제출\\n잔금 133.6백만(100%)","강용"],
-[16,"PMC","페루 전자문서 PMC","KOICA","이도철","24.01~27.12",22.31,"—",73.7,"PC사 기술협상 지원\\nPAO 4차 해외출장 192MD 박규동\\n전문가 6차 출장 44MD\\n해외 2,350MD / 국내 752MD","최상운, 박규동(PAO)"],
-[17,"PMC","콜롬비아 공간정보 PMC","KOICA","고대성","25.09~29.09",16.50,"—",2.6,"1차 해외출장 완료\\nPM교체(오종우→고대성)\\nPAO(김성은) 계약체결\\n예비비 78,571,429원","김성은(PAO)"],
-[18,"PMC","페루 이민청 PMC","KOICA","이정우","25.12~29.12",6.98,"—",0,"계약완료 선수금 97.67백만 수금\\n1차 해외출장 2명 42MD\\nPAO(엄혜령) 현지 투입\\nKISCA 지분: 697,576,124원","엄혜령(PAO)"],
+[1,"PMO","강원랜드 ERP 시스템구축 PMO","강원랜드","박승근","23/11/10 ~ 26/05/31",9.41,11072513,97.7,"0",""],
+[2,"PMO","농림축산식품부 차세대 농업농촌통합정보시스템구축 PMO","농림축산식품부","이동원","23/11/07 ~ 26/12/31",17.3,11307190,84.3,"0",""],
+[3,"PMO","기획재정부 국가결산보고서개편 시스템구축 PMO 용역 사업","기획재정부","손진","24/04/06 ~ 26/03/31",3.19,10296774,100.0,"0",""],
+[4,"PMO","AI 맞춤형 교수학습 플랫폼 1차 구축 사업관리 전문지원","한국지능정보사회
+진흥원","황윤호","24/05/07 ~ 26/04/08",12,11538462,99.2,"",""],
+[5,"PMO","차세대 국가자산처분시스템
+(온비드)구축 PMO 용역","자산관리공사","구경모","24/08/19 ~ 26/04/30",13.63,10732283,97.0,"",""],
+[6,"PMO","광명시 강소형 스마트도시 조성사업 PMO","광명시","김정환","25/05/15~27/05/14",3.28,8200000,47.5,"",""],
+[7,"PMO","자활지원사업 통합정보전산망
+구축 PMO 용역","한국자활복지
+개발원","이경민","25/06/30~26/06/30",1.86,7290196,74.1,"",""],
+[8,"PMO","한국교직원공제회 S2B 재구축 PMO 용역","한국교직원공제회","유재련","25/07/01 ~ 27/03/31",10.45,9008621,39.2,"",""],
+[9,"PMO","정책보험 WEB-EDI심사시스템
+구축 PMO 용역","수협중앙회","김재호","25/07/30 ~ 26/08/14",5.05,9709615,90.4,"",""],
+[10,"PMO","돌봄 통합지원정보시스템 구축
+(1단계) PMO 사업","한국사회보장
+정보원","유동화","25/09/08 ~ 26/08/04",4.69,10841618,72.8,"",""],
+[11,"컨설팅","정보시스템 유지관리 및 조직
+운영전략 수립용역","한국전력거래소","고경철","25/07/30~26/03/20",2.81,17562500,152.5,"",""],
+[12,"PMO","5차년도 빅데이터 AI플랫폼 아이톡톡 구축 사업관리 위탁 PMO용역","경상남도교육청
+(미래교육원)","김종민","26/01/12~26/12/18",2.5,7996800,9.0,"",""],
+[13,"PMO","AI기반 학력진단시스템,국가기초학력지원 포털구축2차 PMO","한국교육과정평가원","최정문","26/01/29~26/12/31",5.12,8669831,13.6,"",""],
+[14,"PMO","의약품 AI심사 및 산업지원 체계구축(1차) PMO","식약처","구경모","26/03/03~26/12/31",2.13,9256522,4.3,"",""],
+[15,"PMO","아이돌봄사 국가자격 관리시스템 구축 PMO 사업","성평등가족부","손진","26/03/19~26/12/31",1.34,10688000,0.0,"",""],
+[16,"PMC","페루 클라우드 기반 중앙부처 전자문서 통합관리시스템 구축사업 PMC 용역","KOICA","이도철","24/01/17~ 27/12/31",22.31,0,73.7,"98461262",""],
+[17,"PMC","콜롬비아 다목적 지적을 위한 공간정보 역량강화 체계 구축사업 PMC 용역","KOICA","고대성
+(변경)","25/09/25~ 29/09/24",16.5,0,2.6,"78571429",""],
+[18,"PMC","페루 이민청 이민행정서비스 개선 및 역량강화 PMC 용역","KOICA","이정우","25/12/11~ 29/12/31",6.98,0,0.0,"0",""]
 ];
-const ISSUE_IDX=[9];
+const ISSUE_IDX=[10];
 const pt=document.getElementById('prjTbl');
 PRJ.forEach((p,i)=>{
   const pct=p[8];let c='#10b981';if(pct<30)c='#e8930c';if(pct>100)c='#e53e3e';
@@ -673,46 +850,46 @@ PRJ.forEach((p,i)=>{
 
 // ═══ DATA: 투입인력 ═══
 const STF=[
-["이주하","수석","연봉제(25%)","AI 맞춤형 교수학습 플랫폼 PMO","24.05~26.04","재계약"],
-["인규민","이사","연봉제(25%)","AI 맞춤형 교수학습 플랫폼 PMO","24.05~26.04","재계약"],
-["황윤호","상무","연봉제(90%)","AI 맞춤형 교수학습 플랫폼 PMO","24.05~26.04",""],
-["김경수","이사","연봉제(80%)","AI 맞춤형 교수학습 플랫폼 PMO","25.03~26.04",""],
-["김명환","이사","연봉제(25%)","강원랜드 ERP PMO","23.11~26.05",""],
-["김종민","이사","연봉제(80%)","아이톡톡 PMO","26.01~26.12",""],
-["김정환","이사","연봉제(25%)","광명시 스마트도시 PMO","25.12~27.05",""],
-["이병성","이사","연봉제(25%)","광명시 스마트도시 PMO","25.05~26.05",""],
-["손진","이사","연봉제(80%)","아이돌봄사 국가자격 관리시스템 PMO","24.04~26.12",""],
-["강용","과장","연봉제(25%)","아이돌봄사 국가자격 관리시스템 PMO","26.04~26.12",""],
-["정창식","이사","연봉제(25%)","농식품부 차세대 농업 PMO","24.09~26.10",""],
-["김종인","이사","연봉제(25%)","농식품부 차세대 농업 PMO","24.01~26.10",""],
-["이동원","상무보","연봉제(80%)","농식품부 차세대 농업 PMO","23.11~26.12",""],
-["정옥영","수석","연봉제(25%)","돌봄 통합지원 PMO","25.12~26.06",""],
-["이병욱","이사","연봉제(25%)","돌봄 통합지원 PMO","25.09~26.06",""],
-["이현호","수석","연봉제(25%)","돌봄 통합지원 PMO","25.09~26.06",""],
-["유동화","전무","연봉제(90%)","돌봄 통합지원 PMO","25.09~26.08",""],
-["이경민","이사","연봉제(80%)","자활지원사업 통합전산망 PMO","25.06~26.06",""],
-["권순열","수석","연봉제(25%)","자활지원사업 통합전산망 PMO","25.06~26.06",""],
-["김재호","이사","연봉제(80%)","수협 WEB-EDI PMO","25.09~26.08",""],
-["박진용","이사","연봉제(25%)","온비드 PMO","24.08~26.04",""],
-["전은미","이사","연봉제(80%)","온비드 PMO","24.10~26.04",""],
-["황재석","수석","연봉제(25%)","온비드 PMO","24.12~26.04",""],
-["구경모","상무","연봉제(80%)","온비드 PMO","24.08~26.04",""],
-["이도철","상무","연봉제(90%)","페루전자문서 PMC","24.01~27.12",""],
-["최상운","상무","연봉제(25%)","페루전자문서 PMC","24.01~27.12",""],
-["박규동","대리","계약직","페루전자문서 PMC","24.04~27.12",""],
-["김성은","대리","계약직","콜롬비아 공간정보 PMC","26.01~26.12",""],
-["엄혜령","대리","계약직","페루 이민청 PMC","26.02~26.12",""],
-["윤정원","수석","계약직","식약처 AI심사 PMO","26.03~26.12",""],
-["정준화","이사","연봉제(25%)","교직원공제회 S2B PMO","25.12~27.03",""],
-["유재련","전무","연봉제(90%)","교직원공제회 S2B PMO","25.06~27.03",""],
-["이상각","상무보","연봉제(25%)","교직원공제회 S2B PMO","25.06~27.03",""],
-["양제연","이사","연봉제(25%)","교직원공제회 S2B PMO","25.06~27.03",""],
-["최정문","상무","연봉제(90%)","교육과정평가원 학력진단 PMO","26.01~26.12",""],
-["김태섭","이사","연봉제(25%)","교육과정평가원 학력진단 PMO","26.01~26.12",""],
-["김기관","수석","연봉제(25%)","교육과정평가원 학력진단 PMO","26.02~26.12",""],
-["이희만","이사","연봉제(25%)","교육과정평가원 학력진단 PMO","26.03~26.12",""],
-["고경철","상무","연봉제(90%)","정보시스템 유지관리 전략수립","25.12~26.04",""],
-["안규태","상무","연봉제(90%)","콜롬비아 공간정보 PMC","26.03~28.09",""],
+["이주하","수석","대기4개월간25%","재계약","AI 맞춤형 교수학습 플랫폼 1차 구축 사업관리 전문지원~2024-05-07 00:00:00","2026-04-08 00:00:00"],
+["인규민","이사","대기4개월간25%","재계약","AI 맞춤형 교수학습 플랫폼 1차 구축 사업관리 전문지원~2024-05-07 00:00:00","2026-04-08 00:00:00"],
+["황윤호","상무","대기3개월초과시90%","","AI 맞춤형 교수학습 플랫폼 1차 구축 사업관리 전문지원~2024-05-07 00:00:00","2026-04-08 00:00:00"],
+["김경수","이사","대기3개월초과시80%","","AI 맞춤형 교수학습 플랫폼 1차 구축 사업관리 전문지원~2025-03-17 00:00:00","2026-04-08 00:00:00"],
+["김명환","이사","대기4개월간25%","","강원랜드 ERP 시스템 구축 PMO~2023-11-10 00:00:00","2026-05-31 00:00:00"],
+["김종민","이사","대기3개월초과시80%","","5차년도 빅데이터 AI플랫폼 아이톡톡 구축사업 사업관리 위탁(PMO)~2026-01-13 00:00:00","2026-12-18 00:00:00"],
+["김정환","이사","대기4개월간25%","","광명시 강소형 스마트도시 조성사업 PMO~2025-12-22 00:00:00","2027-05-14 00:00:00"],
+["이병성","이사","대기4개월간25%","","광명시 강소형 스마트도시 조성사업 PMO~2025-05-15 00:00:00","2026-05-31 00:00:00"],
+["손진","이사","대기3개월초과시80%","","아이돌봄사 국가자격 관리시스템구축 PMO~2024-04-26 00:00:00","2026-12-31 00:00:00"],
+["강용","과장","대기4개월간25%","","아이돌봄사 국가자격 관리시스템구축 PMO~2026-04-01 00:00:00","2026-12-31 00:00:00"],
+["정창식","이사","대기4개월간25%","","농림축산식품부 차세대 농업농촌통합정보시스템 구축 PMO~2024-09-09 00:00:00","2026-10-23 00:00:00"],
+["김종인","이사","대기4개월간25%","","농림축산식품부 차세대 농업농촌통합정보시스템 구축 PMO~2024-01-17 00:00:00","2026-10-30 00:00:00"],
+["이동원","상무보","대기3개월초과시80%","","농림축산식품부 차세대 농업농촌통합정보시스템 구축 PMO~2023-11-07 00:00:00","2026-12-31 00:00:00"],
+["정옥영","수석","대기4개월간25%","","돌봄 통합지원정보시스템 구축 ( 1단계 ) PMO 사업~2025-12-31 00:00:00","2026-06-15 00:00:00"],
+["이병욱","이사","대기4개월간25%","","돌봄 통합지원정보시스템 구축 ( 1단계 ) PMO 사업~2025-09-08 00:00:00","2026-06-15 00:00:00"],
+["이현호","수석","대기4개월간25%","","돌봄 통합지원정보시스템 구축 ( 1단계 ) PMO 사업~2025-09-08 00:00:00","2026-06-30 00:00:00"],
+["유동화","전무","대기3개월초과시90%","","돌봄 통합지원정보시스템 구축 ( 1단계 ) PMO 사업~2025-09-08 00:00:00","2026-08-04 00:00:00"],
+["이경민","이사","대기3개월초과시80%","","자활지원사업 통합정보전산망 구축 PMO 용역~2025-06-09 00:00:00","2026-06-30 00:00:00"],
+["권순열","수석","대기4개월간25%","","자활지원사업 통합정보전산망 구축 PMO 용역~2025-06-18 00:00:00","2026-06-15 00:00:00"],
+["김재호","이사","대기3개월초과시80%","","정책보험 WEB-EDI심사시스템 구축 PMO 용역~2025-09-01 00:00:00","2026-08-15 00:00:00"],
+["박진용","이사","대기4개월간25%","","차세대 국가자산처분시스템(온비드) 구축 PMO 용역~2024-08-19 00:00:00","2026-04-30 00:00:00"],
+["전은미","이사","대기3개월초과시80%","","차세대 국가자산처분시스템(온비드) 구축 PMO 용역~2024-10-21 00:00:00","2026-04-30 00:00:00"],
+["황재석","수석","대기4개월간25%","","차세대 국가자산처분시스템(온비드) 구축 PMO 용역~2024-12-02 00:00:00","2026-04-30 00:00:00"],
+["구경모","상무","대기3개월초과시80%","","차세대 국가자산처분시스템(온비드) 구축 PMO 용역~2024-08-19 00:00:00","2026-04-30 00:00:00"],
+["이도철","상무","대기3개월초과시90%","","페루전자문서 PMC 사업~2024-01-17 00:00:00","2027-12-31 00:00:00"],
+["최상운","상무","대기4개월간25%","","페루전자문서 PMC 사업~2024-01-17 00:00:00","2027-12-31 00:00:00"],
+["박규동","대리","계약직","","페루전자문서 PMC 사업~2024-04-01 00:00:00","2027-12-31 00:00:00"],
+["김성은","대리","계약직","","콜롬비아 다목적 지적을 위한 공간정보 역량강화 체계구축 사업 PMC 용역~2026-01-01 00:00:00","2026-12-31 00:00:00"],
+["엄혜령","대리","계약직","","페루이민청 이민행정서비스 개선 및 역량강화  PMC 사업~2026-02-01 00:00:00","2026-12-31 00:00:00"],
+["윤정원","수석","계약직","","의약품AI심사 및 산업지원 체계구축(1차)PMO 용역~2026-03-09 00:00:00","2026-12-08 00:00:00"],
+["정준화","이사","대기4개월간25%","","한국교직원공제회 S2B 재구축 PMO 용역~2025-12-31 00:00:00","2027-03-05 00:00:00"],
+["유재련","전무","대기3개월초과시90%","","한국교직원공제회 S2B 재구축 PMO 용역~2025-06-16 00:00:00","2027-03-31 00:00:00"],
+["이상각","상무보","대기4개월간25%","","한국교직원공제회 S2B 재구축 PMO 용역~2025-06-16 00:00:00","2027-03-31 00:00:00"],
+["양제연","이사","대기4개월간25%","","한국교직원공제회 S2B 재구축 PMO 용역~2025-06-19 00:00:00","2027-03-31 00:00:00"],
+["최정문","상무","대기3개월초과시90%","","AI기반 학력진단시스템, 국가기초학력지원포탈 구축 2차 PMO~2026-01-29 00:00:00","2026-12-31 00:00:00"],
+["김태섭","이사","대기4개월간25%","","AI기반 학력진단시스템, 국가기초학력지원포탈 구축 2차 PMO~2026-01-30 00:00:00","2026-12-31 00:00:00"],
+["김기관","수석","대기4개월간25%","","AI기반 학력진단시스템, 국가기초학력지원포탈 구축 2차 PMO~2026-02-01 00:00:00","2026-12-31 00:00:00"],
+["이희만","이사","대기4개월간25%","","AI기반 학력진단시스템, 국가기초학력지원포탈 구축 2차 PMO~2026-03-01 00:00:00","2026-12-31 00:00:00"],
+["안규태","상무","대기3개월초과시90%","","콜롬비아 다목적 지적을 위한 공간정보 역량강화 체계구축 사업 PMC 용역~2026-03-04 00:00:00","2028-09-17 00:00:00"],
+["고경철","상무","대기3개월초과시90%","","정보시스템 유지관리 종합계획 및 조직 운영전략 수립용역~2025-12-01 00:00:00","2026-04-30 00:00:00"]
 ];
 const sd=document.getElementById('stfDeployed');
 STF.forEach((s,i)=>{
