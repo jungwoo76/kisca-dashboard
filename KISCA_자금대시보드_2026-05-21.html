@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>㈜한국정보기술단 자금 대시보드 · 2026.05.21</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#eef2f7; --card:#ffffff; --card2:#f7f9fc;
+    --line:#e4e9f2; --line2:#d6deeb;
+    --ink:#16233b; --ink2:#5b6b86; --ink3:#94a2b8;
+    --blue:#2563eb; --blue-l:#3b82f6;
+    --teal:#0d9488; --teal-l:#14b8a6;
+    --amber:#e08c00; --amber-l:#f59e0b;
+    --coral:#e11d48; --coral-l:#f43f5e;
+    --violet:#7c3aed; --violet-l:#8b5cf6;
+    --green:#16a34a;
+    --grad:linear-gradient(135deg,#2563eb,#0d9488);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Pretendard',-apple-system,sans-serif;
+    background:
+      radial-gradient(1000px 460px at 92% -10%, rgba(37,99,235,.07), transparent 60%),
+      radial-gradient(900px 600px at -5% 108%, rgba(13,148,136,.06), transparent 55%),
+      var(--bg);
+    color:var(--ink); line-height:1.5; padding:28px 24px 60px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1320px;margin:0 auto}
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+  /* Header */
+  header{display:flex;justify-content:space-between;align-items:flex-end;
+    flex-wrap:wrap;gap:16px;padding-bottom:22px;border-bottom:2px solid var(--line2);margin-bottom:26px}
+  .brand h1{font-size:13px;font-weight:700;letter-spacing:.16em;color:var(--blue);text-transform:uppercase}
+  .brand h2{font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:6px;color:var(--ink)}
+  .brand h2 b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .meta{text-align:right;font-size:13px;color:var(--ink3)}
+  .meta .date{font-size:20px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+  .meta .unit{margin-top:4px}
+
+  /* KPI strip */
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:26px}
+  .kpi{background:var(--card);border:1px solid var(--line);
+    border-radius:16px;padding:18px;position:relative;overflow:hidden;
+    box-shadow:0 1px 2px rgba(22,35,59,.04),0 6px 20px rgba(22,35,59,.05)}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent,var(--ink3))}
+  .kpi .lbl{font-size:12px;color:var(--ink2);font-weight:700;display:flex;align-items:center;gap:6px}
+  .kpi .val{font-size:25px;font-weight:800;letter-spacing:-.02em;margin-top:10px;font-variant-numeric:tabular-nums}
+  .kpi .sub{font-size:11.5px;color:var(--ink3);margin-top:5px;font-variant-numeric:tabular-nums}
+  .kpi.warn{--accent:var(--coral)} .kpi.warn .val{color:var(--coral)}
+  .kpi.pos{--accent:var(--teal)} .kpi.pos .val{color:var(--teal)}
+  .kpi.neutral{--accent:var(--blue)} .kpi.neutral .val{color:var(--blue)}
+  .kpi.amber{--accent:var(--amber-l)} .kpi.amber .val{color:var(--amber)}
+  .kpi.violet{--accent:var(--violet)} .kpi.violet .val{color:var(--violet)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block}
+
+  /* Sections */
+  .section{margin-bottom:30px}
+  .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .sec-head .n{font-size:12px;font-weight:800;color:#fff;background:var(--blue);
+    width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex:none;
+    box-shadow:0 4px 10px rgba(37,99,235,.3)}
+  .sec-head h3{font-size:19px;font-weight:800;letter-spacing:-.01em}
+  .sec-head .tag{font-size:12px;color:var(--ink3);margin-left:auto;font-weight:600}
+
+  .grid{display:grid;gap:16px}
+  .g-2{grid-template-columns:1fr 1fr}
+  .g-32{grid-template-columns:1.35fr 1fr}
+  .g-23{grid-template-columns:1fr 1.5fr}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;
+    box-shadow:0 1px 2px rgba(22,35,59,.04),0 6px 20px rgba(22,35,59,.04)}
+  .panel h4{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:4px}
+  .panel .desc{font-size:12px;color:var(--ink3);margin-bottom:14px;font-weight:500}
+
+  /* Bars / lists */
+  .barrow{display:grid;grid-template-columns:130px 1fr 92px;align-items:center;gap:12px;padding:7px 0}
+  .barrow .nm{font-size:12.5px;color:var(--ink2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .barrow .track{height:11px;background:#e9eef6;border-radius:6px;overflow:hidden;border:1px solid var(--line);display:block}
+  .barrow .fill{display:block;height:100%;border-radius:6px;min-width:3px}
+  .barrow .am{font-size:12.5px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+
+  /* Tables */
+  .tbl-wrap{overflow:auto;border-radius:12px;border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  thead th{background:#f1f5fb;color:var(--ink2);font-weight:800;text-align:left;
+    padding:11px 12px;position:sticky;top:0;white-space:nowrap;border-bottom:2px solid var(--line2)}
+  tbody td{padding:9px 12px;border-bottom:1px solid var(--line);color:var(--ink);white-space:nowrap}
+  tbody tr:hover{background:#f6f9fe}
+  td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+  td.nm{white-space:normal;min-width:240px;color:var(--ink2)}
+  .pill{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:20px;display:inline-block}
+  .pill.fix{background:#e0ecfe;color:var(--blue)}
+  .pill.var{background:#efe7fe;color:var(--violet)}
+  .pill.un{background:#d8f5f0;color:var(--teal)}
+  .pill.fa{background:#fdeecb;color:var(--amber)}
+  .due-soon{color:var(--coral);font-weight:800}
+  .due-near{color:var(--amber);font-weight:800}
+
+  .chartbox{position:relative;height:300px}
+  .chartbox.tall{height:340px}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--ink2);font-weight:600}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  .note{font-size:11.5px;color:var(--ink3);margin-top:12px;line-height:1.7}
+  .alert{background:linear-gradient(135deg,#fff1f3,#fff7ec);
+    border:1px solid #f8c9d2;border-radius:14px;padding:16px 18px;margin-bottom:26px;
+    display:flex;gap:14px;align-items:flex-start;box-shadow:0 4px 14px rgba(225,29,72,.06)}
+  .alert .ic{font-size:20px;flex:none}
+  .alert b{color:var(--coral)}
+  .alert .txt{font-size:13px;color:var(--ink2);line-height:1.7}
+
+  footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line2);
+    font-size:11.5px;color:var(--ink3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-weight:500}
+
+  /* Login gate */
+  #gate{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;
+    background:
+      radial-gradient(1000px 500px at 82% -12%, rgba(37,99,235,.12), transparent 60%),
+      radial-gradient(800px 500px at 0% 110%, rgba(13,148,136,.10), transparent 55%),
+      #eef2f7; padding:24px}
+  .login-card{width:100%;max-width:382px;background:#fff;border:1px solid var(--line);
+    border-radius:20px;padding:34px 30px;box-shadow:0 14px 50px rgba(22,35,59,.14)}
+  .lk-brand{font-size:12px;font-weight:800;letter-spacing:.15em;color:var(--blue);text-transform:uppercase}
+  .login-card h2{font-size:23px;font-weight:800;margin:9px 0 4px;color:var(--ink);letter-spacing:-.02em}
+  .lk-sub{font-size:13px;color:var(--ink3);margin-bottom:24px;font-weight:500}
+  .fld{margin-bottom:14px}
+  .fld label{display:block;font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:6px}
+  .fld input{width:100%;padding:12px 14px;border:1px solid var(--line2);border-radius:11px;
+    font-size:14px;font-family:inherit;color:var(--ink);background:#f8fafd;transition:.15s}
+  .fld input:focus{outline:none;border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.13)}
+  .lk-btn{width:100%;padding:13px;border:none;border-radius:11px;cursor:pointer;
+    background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;font-size:15px;font-weight:800;
+    font-family:inherit;margin-top:6px;box-shadow:0 6px 16px rgba(37,99,235,.3);transition:.15s}
+  .lk-btn:hover{filter:brightness(1.07)}
+  .lk-btn:active{transform:translateY(1px)}
+  .lk-err{font-size:12.5px;color:var(--coral);font-weight:700;margin-top:12px;min-height:18px;text-align:center}
+  .lk-note{font-size:11px;color:var(--ink3);margin-top:18px;text-align:center;line-height:1.6}
+
+  /* Logout button */
+  .logout-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 15px;
+    border:1px solid var(--line2);border-radius:10px;background:#fff;cursor:pointer;
+    font-family:inherit;font-size:12.5px;font-weight:700;color:var(--ink2);transition:.15s;
+    box-shadow:0 1px 2px rgba(22,35,59,.04)}
+  .logout-btn:hover{border-color:var(--coral);color:var(--coral);background:#fff5f7}
+  .logout-btn:active{transform:translateY(1px)}
+  .logout-btn svg{width:14px;height:14px}
+
+  @media(max-width:980px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .g-2,.g-32,.g-23{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div id="gate">
+  <div class="login-card">
+    <div class="lk-brand">㈜한국정보기술단 · PMC 사업본부</div>
+    <h2>자금 운용 대시보드</h2>
+    <p class="lk-sub">접근 권한이 있는 사용자만 열람할 수 있습니다.</p>
+    <div class="fld">
+      <label for="uid">아이디</label>
+      <input id="uid" type="text" autocomplete="username" placeholder="아이디를 입력하세요">
+    </div>
+    <div class="fld">
+      <label for="upw">비밀번호</label>
+      <input id="upw" type="password" autocomplete="current-password" placeholder="비밀번호를 입력하세요">
+    </div>
+    <button class="lk-btn" id="lkBtn">로그인</button>
+    <div class="lk-err" id="lkErr"></div>
+    <div class="lk-note">2026.05.21 일일 자금일보 기준 · 사내 열람용</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <h1>㈜한국정보기술단 · KISCA 일일 자금일보</h1>
+      <h2>자금 운용 <b>통합 대시보드</b></h2>
+    </div>
+    <div class="meta">
+      <div class="date">2026. 05. 21 (목)</div>
+      <div class="unit">담당 김민희 · 단위: 원(부가세 포함)</div>
+      <button class="logout-btn" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        로그아웃 (sunny)
+      </button>
+    </div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="alert">
+    <div class="ic">⚠️</div>
+    <div class="txt">
+      <b>차입 만기 집중 주의.</b> 총 차입 잔액 <b>395.6억</b>(한도 399.4억) 중 <b>국민은행 우대대출 24.5억</b>이 <b>5/30 만기</b> 도래하며,
+      6~8월에 <b>약 158억</b> 규모 운전·시설자금 만기가 연속 집중됩니다. 한편 5월 실수금(9.4억)이 미수금(14.3억)·당월 지출예정(46.1억)에 크게 미달 — 차환 및 단기 유동성 관리 필요.
+    </div>
+  </div>
+
+  <!-- 1. 자금수지 요약 -->
+  <div class="section">
+    <div class="sec-head"><span class="n">1</span><h3>자금수지 요약</h3><span class="tag">자산 vs 부채 · 당일 시제 기준</span></div>
+    <div class="grid g-32">
+      <div class="panel">
+        <h4>재무 포지션 개요</h4>
+        <div class="desc">자산성 항목과 차입·부채성 항목 비교 (억원)</div>
+        <div id="balanceBars"></div>
+        <div class="note">※ 보통예금 사용가능액은 마이너스 통장 한도 반영 후 실가용액 기준. 퇴직연금은 가입자 적립금(DB+DC)으로 회사 순현금이 아님.</div>
+      </div>
+      <div class="panel">
+        <h4>당일 현금 흐름</h4>
+        <div class="desc">2026.05.21 입·출금</div>
+        <div class="chartbox" style="height:150px"><canvas id="todayFlow"></canvas></div>
+        <table style="margin-top:14px"><tbody>
+          <tr><td class="nm">금일 입금</td><td class="r" style="color:var(--teal)">0</td></tr>
+          <tr><td class="nm">금일 출금 (약관이자·렌탈)</td><td class="r" style="color:var(--coral)">311,953</td></tr>
+          <tr><td class="nm">보통예금 합계 (실가용)</td><td class="r">26,341,941</td></tr>
+          <tr><td class="nm">현금 시재</td><td class="r">619,673</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 차입금 현황 -->
+  <div class="section">
+    <div class="sec-head"><span class="n">2</span><h3>차입금 현황</h3><span class="tag">차입 잔액 395.6억 · 총한도 399.4억 · 31건</span></div>
+    <div class="grid g-23">
+      <div class="panel">
+        <h4>자금 용도별 구성</h4>
+        <div class="desc">운전 vs 시설 vs 단기차입</div>
+        <div class="chartbox" style="height:230px"><canvas id="debtDonut"></canvas></div>
+        <div class="legend" id="debtLegend"></div>
+      </div>
+      <div class="panel">
+        <h4>주거래 은행별 차입 잔액</h4>
+        <div class="desc">은행권 대출 기준 (억원)</div>
+        <div id="bankBars"></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h4>단기차입금 내역 (개인·법인)</h4>
+      <div class="desc">잔액 합계 864,980,825원 · 매월 이자 별도(옹상순 583,300/월)</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>차입처</th><th>비고(차입일)</th><th class="r">총 차입액</th><th class="r">상환</th><th class="r">잔액</th></tr></thead>
+          <tbody id="shortTbl"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 대출 만기 / 이자 일정 -->
+  <div class="section">
+    <div class="sec-head"><span class="n">3</span><h3>대출 만기 · 이자 일정표</h3><span class="tag">은행권 31건 · 가중평균금리 3.79%</span></div>
+    <div class="grid g-2">
+      <div class="panel">
+        <h4>만기 도래 분포</h4>
+        <div class="desc">월별 만기 잔액 (억원) — 적색=3개월 내, 황색=6개월 내</div>
+        <div class="chartbox"><canvas id="maturityChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <h4>월중 이자·상환 납부일 분포</h4>
+        <div class="desc">납부일(매월 일자)별 건수 — 자동이체 집중일 파악</div>
+        <div class="chartbox"><canvas id="payday"></canvas></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h4>대출 상세 일정표</h4>
+      <div class="desc">만기 임박순 정렬 · <span class="due-soon">●</span> 3개월 내 &nbsp; <span class="due-near">●</span> 6개월 내</div>
+      <div class="tbl-wrap" style="max-height:460px">
+        <table>
+          <thead><tr>
+            <th>구분</th><th>대출 계좌</th><th class="r">한도/잔액</th><th class="r">금리</th><th>유형</th><th class="r">만기일</th><th class="r">잔여</th><th>이자일</th>
+          </tr></thead>
+          <tbody id="loanTbl"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 월별 현금흐름 -->
+  <div class="section">
+    <div class="sec-head"><span class="n">4</span><h3>월별 수금 vs 지출 현금흐름</h3><span class="tag">2026년 연간 · 청구/수금/지출</span></div>
+    <div class="grid g-32">
+      <div class="panel">
+        <h4>월별 수금 · 청구예정 추이</h4>
+        <div class="desc">실수금(실적) vs 청구예정(파이프라인), 단위 억원</div>
+        <div class="chartbox tall"><canvas id="cashflow"></canvas></div>
+        <div class="legend">
+          <span><i class="sw" style="background:var(--teal)"></i>실수금</span>
+          <span><i class="sw" style="background:var(--amber-l)"></i>청구예정</span>
+          <span><i class="sw" style="background:var(--coral)"></i>미수금(5월)</span>
+        </div>
+      </div>
+      <div class="panel">
+        <h4>연간 청구·수주 요약</h4>
+        <div class="desc">2026년 누계 기준</div>
+        <div id="annualBars" style="margin-bottom:10px"></div>
+        <div class="tbl-wrap" style="margin-top:8px"><table><tbody>
+          <tr><td class="nm">총 수주잔고</td><td class="r" style="color:var(--blue);font-weight:800">317.7억</td></tr>
+          <tr><td class="nm">계약예정 합계 (6건)</td><td class="r" style="color:var(--violet);font-weight:800">29.3억</td></tr>
+          <tr><td class="nm">기 청구액(A)</td><td class="r">116.6억</td></tr>
+          <tr><td class="nm">기 수금액</td><td class="r" style="color:var(--teal)">102.3억</td></tr>
+          <tr><td class="nm">잔여 청구예정(B)</td><td class="r" style="color:var(--amber)">108.6억</td></tr>
+          <tr><td class="nm">2026 총 청구예상(A+B)</td><td class="r" style="font-weight:800">225.1억</td></tr>
+        </tbody></table></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h4>지출결의서 요약 (2026.05월)</h4>
+      <div class="desc">미지급 누계 포함 · 단위 원</div>
+      <div class="grid g-2" style="gap:14px">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>구분</th><th class="r">지출예정</th><th class="r">지출(실)</th><th class="r">미지출</th></tr></thead>
+          <tbody>
+            <tr><td class="nm">5월 합계</td><td class="r">4,613,080,485</td><td class="r" style="color:var(--teal)">554,306,975</td><td class="r" style="color:var(--coral)">4,058,773,510</td></tr>
+            <tr><td class="nm"><b>총 합계</b><br><span style="color:var(--ink3);font-size:11px">경비+세금계산서+1~5월 미지급</span></td><td class="r"><b>14,638,719,888</b></td><td class="r" style="color:var(--teal)"><b>5,651,755,584</b></td><td class="r" style="color:var(--coral)"><b>8,986,964,304</b></td></tr>
+            <tr><td class="nm">미지급 누계액(A)</td><td class="r" colspan="3" style="text-align:right;color:var(--amber)">915,766,705</td></tr>
+          </tbody>
+        </table></div>
+        <div>
+          <div class="chartbox" style="height:188px"><canvas id="spendChart"></canvas></div>
+          <div class="note">최대 지출 항목: 월 급여(395명 약 13.8억) · 4대보험 약 2.7억 · 법인카드 결제 약 6.1억 · 대출이자 다수.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>본 대시보드는 KISCA 2026.05.21 일일 자금일보 원본 데이터를 시각화한 것입니다.</span>
+    <span>차입 잔액 395.6억 · 운전 183.1억 · 시설 212.5억 (총한도 399.4억)</span>
+  </footer>
+</div>
+
+<script>
+/* light theme chart defaults */
+Chart.defaults.color='#5b6b86';
+Chart.defaults.borderColor='#e8edf5';
+Chart.defaults.font.family="'Pretendard',sans-serif";
+
+const W=(n)=>n.toLocaleString('ko-KR');
+const EOK=(n)=>(n/1e8);
+const fmtOk=(n,d=1)=>EOK(n).toLocaleString('ko-KR',{maximumFractionDigits:d,minimumFractionDigits:d})+'억';
+const GRID='#eef2f8', TICK='#5b6b86';
+
+/* ---------- DATA ---------- */
+const DEBT_TOTAL=39562292515, WORKING=18312892515, FACILITY=21249400000, SHORT=864980825;
+
+const kpis=[
+ {lbl:'대출 잔액',cls:'warn',val:'395.6억',sub:'총한도 399.4억 · 운전 183.1 + 시설 212.5'},
+ {lbl:'보통예금 실가용액',cls:'neutral',val:'26.3백만',sub:'마이너스 통장 한도 반영 후'},
+ {lbl:'5월 실수금',cls:'pos',val:'9.4억',sub:'미수금 14.3억 · 청구예정 23.7억'},
+ {lbl:'5월 지출예정',cls:'amber',val:'46.1억',sub:'실지출 5.5억 · 미지출 40.6억'},
+ {lbl:'단기차입 잔액',cls:'violet',val:'8.65억',sub:'개인·법인 9건'},
+];
+
+const banks=[
+ {nm:'기업은행',amt:227.8,c:'#2563eb'},
+ {nm:'우리은행',amt:84.7,c:'#0d9488'},
+ {nm:'국민은행',amt:39.5,c:'#e08c00'},
+ {nm:'하나은행',amt:31.9,c:'#7c3aed'},
+ {nm:'농협',amt:10.8,c:'#16a34a'},
+ {nm:'메트라이프(약관)',amt:0.9,c:'#e11d48'},
+];
+
+const shortLoans=[
+ {nm:'옹상순',memo:'26.04.28 · 월이자 583,300',tot:140000000,rep:0,bal:140000000},
+ {nm:'㈜커머스웨어',memo:'26.04/02·03',tot:300000000,rep:0,bal:300000000},
+ {nm:'강향춘',memo:'26.03/03·31, 4/30',tot:130000000,rep:0,bal:130000000},
+ {nm:'이우용',memo:'26.02/05·9·11, 3/17, 4/3',tot:225000000,rep:100000000,bal:125000000},
+ {nm:'윤종열',memo:'25.10.14',tot:100000000,rep:0,bal:100000000},
+ {nm:'이지현',memo:'26.04.30',tot:39980825,rep:0,bal:39980825},
+ {nm:'한재용',memo:'26.02/03·05',tot:58500000,rep:38500000,bal:20000000},
+ {nm:'이선희',memo:'26.05.06, 05.14',tot:45000000,rep:35000000,bal:10000000},
+ {nm:'이호득',memo:'26.02/23',tot:15000000,rep:15000000,bal:0},
+];
+
+const loans=[
+ ['운전','국민은행 KB유망분야 우대대출(322287)',24.5,2450000000,3.79,'고정','2026-05-30','매월 30일'],
+ ['운전','하나은행 신성장일자리(00142)',10,1000000000,4.872,'변동','2026-06-16','매월 16일'],
+ ['운전','하나은행 신성장일자리(99642)',5,500000000,4.872,'변동','2026-06-16','매월 16일'],
+ ['운전','우리은행 CUBE론X 운전·일시(734463)',5,500000000,4.33,'변동','2026-06-03','매월 03일'],
+ ['운전','기업은행 중기자금대출(00088)',5,500000000,3.954,'고정','2026-07-03','매월 03일'],
+ ['운전','기업은행 중소운전자금(00099)',17,1700000000,3.896,'변동','2026-07-03','매월 30일'],
+ ['운전','하나은행 신성장(93642·신보)',10.8,1080000000,3.977,'변동','2026-07-16','매월 20일'],
+ ['시설','우리은행 CUBE론X 시설·일시(168918)',30,3000000000,3.52,'변동','2026-07-08','분기 07일'],
+ ['시설','우리은행 CUBE론X 시설·분할(055931)',53.3,4970000000,3.70,'분할','2026-08-06','매월 05일'],
+ ['시설','기업은행 변동금리 3월물(00039)',32.8,3280000000,3.686,'변동','2026-08-25','매월 25일'],
+ ['운전','기업은행 중소운전자금(00100)',10,1000000000,4.4717,'고정','2026-08-25','매월 30일'],
+ ['운전','하나은행 일반운전·분할(21942)',5,250000000,4.915,'분할','2026-08-28','매월 28일'],
+ ['운전','국민은행 KB우대대출(324223)',5,500000000,3.96,'고정','2026-09-30','매월 30일'],
+ ['운전','농협 일반자금대출(0487-91·담보)',5,500000000,4.28,'변동','2026-09-30','매월 30일'],
+ ['운전','농협 일반자금대출(0863-21·분할)',2.5,83300000,5.13,'변동','2026-10-24','분기 24일'],
+ ['운전','농협 일반자금대출(0862-91)',5,500000000,4.04,'변동','2026-10-24','매월 24일'],
+ ['운전','기업은행 가스공사동순성장(00077)',5,500000000,3.345,'변동','2026-11-13','매월 13일'],
+ ['운전','기업은행 중기자금대출(00067)',4,400000000,4.1952,'고정','2027-02-19','매월 20일'],
+ ['운전','기업은행 중기운전자금(00111)',5,500000000,4.775,'고정','2027-02-20','매월 23일'],
+ ['운전','기업은행 중기자금대출(00112)',3,300000000,4.5658,'고정','2027-02-20','매월 05일'],
+ ['시설','기업은행 세종IT 중도금(00079)',20,2000000000,3.5571,'고정','2027-03-27','매월 27일'],
+ ['시설','기업은행 세종IT 중도금(00081·신보)',20,2000000000,3.5611,'고정','2027-03-27','매월 27일'],
+ ['시설','기업은행 세종IT 중도금(00090·신보)',30,3000000000,3.053,'변동','2027-03-27','매월 03일'],
+ ['시설','기업은행 세종IT 중도금(00095·신보)',30,2999400000,3.401,'변동','2027-03-27','매월 30일'],
+ ['운전','기업은행 정책자금(00061)',6,600000000,4.3725,'고정','2027-05-14','매월 14일'],
+ ['운전','기업은행 중기자금대출(00083)',10,1000000000,4.2901,'고정','2027-05-14','매월 14일'],
+ ['운전','기업은행 중기자금대출(00106)',10,1000000000,3.986,'고정','2027-05-14','매월 14일'],
+ ['운전','기업은행 온렌딩운전자금(00038)',20,2000000000,3.742,'고시','2027-06-15','분기 15일'],
+ ['운전','국민은행 온렌딩대출(32597)',10,1000000000,3.95,'고시','2028-06-15','분기 15일'],
+ ['운전','메트라이프 약관대출(25.11.20)',0.77,77000000,4.05,'약관','상환일','매월 20일'],
+ ['운전','메트라이프 약관대출(26.05.06)',0.13,13090000,4.05,'약관','상환일','매월 20일'],
+];
+
+const months=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+const collected=[22.77,23.08,28.26,18.76,9.39,null,null,null,null,null,null,null];
+const billing  =[null,null,null,null,23.69,15.69,11.73,7.44,3.81,4.48,6.57,35.14];
+const unpaid5  =14.30;
+
+/* ---------- KPIs ---------- */
+document.getElementById('kpis').innerHTML=kpis.map(k=>`
+ <div class="kpi ${k.cls}">
+   <div class="lbl"><span class="dot"></span>${k.lbl}</div>
+   <div class="val num">${k.val}</div>
+   <div class="sub num">${k.sub}</div>
+ </div>`).join('');
+
+/* ---------- 1. balance bars ---------- */
+const balItems=[
+ {nm:'대출 잔액',v:395.62,c:'#e11d48',neg:true},
+ {nm:'시설자금',v:212.49,c:'#f59e0b',neg:true},
+ {nm:'운전자금',v:183.13,c:'#fb7185',neg:true},
+ {nm:'미지급 누계',v:9.16,c:'#fb923c',neg:true},
+ {nm:'단기차입금',v:8.65,c:'#7c3aed',neg:true},
+ {nm:'퇴직연금(적립)',v:43.11,c:'#0d9488',neg:false},
+ {nm:'예·적금',v:8.88,c:'#14b8a6',neg:false},
+ {nm:'보통예금 가용',v:0.26,c:'#2563eb',neg:false},
+];
+const balMax=Math.max(...balItems.map(b=>b.v));
+document.getElementById('balanceBars').innerHTML=balItems.map(b=>`
+ <div class="barrow">
+   <span class="nm">${b.nm}</span>
+   <span class="track"><span class="fill" style="width:${Math.max(2,b.v/balMax*100)}%;background:${b.c}"></span></span>
+   <span class="am">${b.neg?'−':''}${b.v.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2})}억</span>
+ </div>`).join('');
+
+/* ---------- today flow ---------- */
+new Chart(todayFlow,{type:'bar',data:{labels:['입금','출금'],datasets:[{data:[0,311953],
+ backgroundColor:['#14b8a6','#e11d48'],borderRadius:6,barThickness:38}]},
+ options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>W(c.raw)+'원'}}},
+ scales:{x:{grid:{color:GRID},ticks:{color:TICK,callback:v=>W(v)}},y:{grid:{display:false},ticks:{color:'#16233b',font:{weight:700}}}}}});
+
+/* ---------- 2. debt donut ---------- */
+const dData=[{l:'운전자금',v:WORKING,c:'#fb7185'},{l:'시설자금',v:FACILITY,c:'#f59e0b'},{l:'단기차입',v:SHORT,c:'#7c3aed'}];
+new Chart(debtDonut,{type:'doughnut',data:{labels:dData.map(d=>d.l),
+ datasets:[{data:dData.map(d=>d.v),backgroundColor:dData.map(d=>d.c),borderColor:'#ffffff',borderWidth:3}]},
+ options:{cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+' '+fmtOk(c.raw)}}}}});
+const dTot=WORKING+FACILITY+SHORT;
+document.getElementById('debtLegend').innerHTML=dData.map(d=>
+ `<span><i class="sw" style="background:${d.c}"></i>${d.l} ${fmtOk(d.v)} <span style="color:var(--ink3)">(${(d.v/dTot*100).toFixed(0)}%)</span></span>`).join('');
+
+/* ---------- bank bars ---------- */
+const bMax=Math.max(...banks.map(b=>b.amt));
+document.getElementById('bankBars').innerHTML=banks.map(b=>`
+ <div class="barrow">
+   <span class="nm">${b.nm}</span>
+   <span class="track"><span class="fill" style="width:${b.amt/bMax*100}%;background:${b.c}"></span></span>
+   <span class="am">${b.amt.toFixed(1)}억</span>
+ </div>`).join('');
+
+/* ---------- short-term loans table ---------- */
+document.getElementById('shortTbl').innerHTML=shortLoans.map(s=>`
+ <tr><td class="nm" style="min-width:auto;color:var(--ink);font-weight:700">${s.nm}</td>
+ <td class="nm" style="min-width:auto">${s.memo}</td>
+ <td class="r">${W(s.tot)}</td>
+ <td class="r" style="color:var(--ink3)">${s.rep?W(s.rep):'−'}</td>
+ <td class="r" style="font-weight:800;color:${s.bal===0?'var(--ink3)':'var(--violet)'}">${W(s.bal)}</td></tr>`).join('');
+
+/* ---------- 3. maturity chart ---------- */
+const NOW=new Date('2026-05-21');
+function monthsTo(d){const t=new Date(d);return (t.getFullYear()-NOW.getFullYear())*12+(t.getMonth()-NOW.getMonth());}
+const matMap={};
+loans.forEach(l=>{ if(l[6]==='상환일')return; const key=l[6].slice(0,7); matMap[key]=(matMap[key]||0)+l[3]/1e8; });
+const matKeys=Object.keys(matMap).sort();
+const matLabels=matKeys.map(k=>{const[y,m]=k.split('-');return `${y.slice(2)}.${m}`});
+const matColors=matKeys.map(k=>{const mm=monthsTo(k+'-01');return mm<=3?'#e11d48':mm<=6?'#f59e0b':'#3b82f6'});
+new Chart(maturityChart,{type:'bar',data:{labels:matLabels,datasets:[{data:matKeys.map(k=>matMap[k]),
+ backgroundColor:matColors,borderRadius:5}]},
+ options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw.toFixed(1)+'억'}}},
+ scales:{x:{grid:{display:false},ticks:{color:TICK}},y:{grid:{color:GRID},ticks:{color:TICK,callback:v=>v+'억'}}}}});
+
+/* ---------- payday distribution ---------- */
+const pd={};
+loans.forEach(l=>{const m=l[7].match(/(\d{2})일/);if(!m)return;const d=parseInt(m[1]);const q=l[7].includes('분기');pd[d]=pd[d]||{m:0,q:0};q?pd[d].q++:pd[d].m++;});
+const pdKeys=Object.keys(pd).map(Number).sort((a,b)=>a-b);
+new Chart(payday,{type:'bar',data:{labels:pdKeys.map(d=>d+'일'),datasets:[
+ {label:'매월',data:pdKeys.map(d=>pd[d].m),backgroundColor:'#2563eb',borderRadius:4,stack:'s'},
+ {label:'분기',data:pdKeys.map(d=>pd[d].q),backgroundColor:'#8b5cf6',borderRadius:4,stack:'s'}]},
+ options:{plugins:{legend:{labels:{color:TICK,boxWidth:11,font:{size:11,weight:600}}},tooltip:{callbacks:{label:c=>c.dataset.label+' '+c.raw+'건'}}},
+ scales:{x:{grid:{display:false},ticks:{color:TICK}},y:{grid:{color:GRID},ticks:{color:TICK,stepSize:1}}}}});
+
+/* ---------- loan detail table ---------- */
+function dueClass(d){if(d==='상환일')return['',''];const m=monthsTo(d);if(m<=3)return['due-soon',m+'개월'];if(m<=6)return['due-near',m+'개월'];return['',m+'개월'];}
+document.getElementById('loanTbl').innerHTML=loans.map(l=>{
+ const[cls,rem]=dueClass(l[6]);
+ const typePill=l[5]==='고정'?'fix':l[5]==='변동'?'var':'fa';
+ const cat=l[0]==='운전'?'<span class="pill un">운전</span>':'<span class="pill fa">시설</span>';
+ return `<tr>
+  <td>${cat}</td>
+  <td class="nm" style="color:var(--ink)">${l[1]}</td>
+  <td class="r">${l[2]}억<br><span style="color:var(--ink3);font-size:11px">${W(l[3])}</span></td>
+  <td class="r">${l[4]}%</td>
+  <td><span class="pill ${typePill}">${l[5]}</span></td>
+  <td class="r ${cls}">${l[6]}</td>
+  <td class="r ${cls}">${rem}</td>
+  <td style="color:var(--ink2)">${l[7]}</td>
+ </tr>`;}).join('');
+
+/* ---------- 4. cashflow chart ---------- */
+new Chart(cashflow,{data:{labels:months,datasets:[
+ {type:'bar',label:'실수금',data:collected,backgroundColor:'#0d9488',borderRadius:5,order:2},
+ {type:'bar',label:'청구예정',data:billing,backgroundColor:'#f59e0b',borderRadius:5,order:2},
+ {type:'line',label:'미수금(5월)',data:[null,null,null,null,unpaid5,null,null,null,null,null,null,null],
+  borderColor:'#e11d48',backgroundColor:'#e11d48',pointRadius:6,pointStyle:'rectRot',showLine:false,order:1}]},
+ options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+' '+(c.raw?c.raw.toFixed(2):'-')+'억'}}},
+ scales:{x:{grid:{display:false},ticks:{color:TICK}},y:{grid:{color:GRID},ticks:{color:TICK,callback:v=>v+'억'}}}}});
+
+/* ---------- annual bars ---------- */
+const ann=[{nm:'기 청구액(A)',v:116.6,c:'#2563eb'},{nm:'기 수금액',v:102.3,c:'#0d9488'},{nm:'잔여 청구예정(B)',v:108.6,c:'#f59e0b'}];
+const aMax=Math.max(...ann.map(a=>a.v));
+document.getElementById('annualBars').innerHTML=ann.map(a=>`
+ <div class="barrow"><span class="nm">${a.nm}</span>
+ <span class="track"><span class="fill" style="width:${a.v/aMax*100}%;background:${a.c}"></span></span>
+ <span class="am">${a.v}억</span></div>`).join('');
+
+/* ---------- spend chart ---------- */
+new Chart(spendChart,{type:'bar',data:{labels:['지출예정','실지출','미지출'],datasets:[{
+ data:[14638719888,5651755584,8986964304],backgroundColor:['#3b82f6','#0d9488','#e11d48'],borderRadius:6,barThickness:30}]},
+ options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtOk(c.raw)}}},
+ scales:{x:{grid:{color:GRID},ticks:{color:TICK,callback:v=>(v/1e8).toFixed(0)+'억'}},y:{grid:{display:false},ticks:{color:'#16233b',font:{weight:700}}}}}});
+
+/* ---------- login gate ---------- */
+(function(){
+  const ID='sunny', PW='1348';
+  const gate=document.getElementById('gate');
+  const uid=document.getElementById('uid');
+  const upw=document.getElementById('upw');
+  const err=document.getElementById('lkErr');
+  function tryLogin(){
+    if(uid.value.trim()===ID && upw.value===PW){
+      gate.style.opacity='0';
+      gate.style.transition='opacity .25s';
+      setTimeout(()=>{gate.style.display='none';},250);
+    }else{
+      err.textContent='아이디 또는 비밀번호가 올바르지 않습니다.';
+      upw.value=''; upw.focus();
+    }
+  }
+  document.getElementById('lkBtn').addEventListener('click',tryLogin);
+  [uid,upw].forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();}));
+  uid.focus();
+
+  /* logout: bring the gate back */
+  document.getElementById('logoutBtn').addEventListener('click',function(){
+    gate.style.display='flex';
+    gate.style.opacity='1';
+    err.textContent='';
+    uid.value=''; upw.value='';
+    window.scrollTo(0,0);
+    uid.focus();
+  });
+})();
+</script>
+</body>
+</html>
