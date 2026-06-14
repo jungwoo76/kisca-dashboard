@@ -731,14 +731,14 @@ function goToKey(idx){
 <!-- ══════ 4. 국내 제안준비 ══════ -->
 <div class="pn" id="domestic">
   <div class="kpi-row">
-    <div class="kpi"><div class="kpi-top"><div class="kpi-ic i">🔄</div><div class="kpi-lb">제안 준비 (6월 집중)</div></div><div class="kpi-v" style="color:var(--ac)">3<span class="kpi-u">건</span></div></div>
-    <div class="kpi"><div class="kpi-top"><div class="kpi-ic a">📅</div><div class="kpi-lb">발주예정</div></div><div class="kpi-v" style="color:var(--am)">9<span class="kpi-u">건</span></div></div>
+    <div class="kpi"><div class="kpi-top"><div class="kpi-ic i">🔄</div><div class="kpi-lb">제안 준비 (6월 집중)</div></div><div class="kpi-v" style="color:var(--ac)">4<span class="kpi-u">건</span></div></div>
+    <div class="kpi"><div class="kpi-top"><div class="kpi-ic a">📅</div><div class="kpi-lb">발주예정</div></div><div class="kpi-v" style="color:var(--am)">8<span class="kpi-u">건</span></div></div>
   </div>
-  <div class="cd"><div class="cd-h"><h3>제안 준비 (6월 집중)</h3><span class="badge badge-i">3건</span></div>
+  <div class="cd"><div class="cd-h"><h3>제안 준비 (6월 집중)</h3><span class="badge badge-i">4건</span></div>
     <div class="sx"><table><thead><tr><th>#</th><th>발주처</th><th>사업명</th><th class="ar">사업비(억)</th><th>PM</th><th>단계</th><th>평가방식</th><th>인력배정</th></tr></thead>
     <tbody id="domTbl"></tbody></table></div>
   </div>
-  <div class="cd"><div class="cd-h"><h3>발주 예정</h3><span class="badge badge-a">9건</span></div>
+  <div class="cd"><div class="cd-h"><h3>발주 예정</h3><span class="badge badge-a">8건</span></div>
     <div class="sx"><table><thead><tr><th>#</th><th>발주처</th><th>사업명</th><th class="ar">사업비(억)</th><th>발주시기</th><th>PM</th><th>제안서 작성</th></tr></thead>
     <tbody id="domUpTbl"></tbody></table></div>
   </div>
@@ -923,9 +923,10 @@ function tog(id){var r=document.getElementById(id);if(!r)return;r.classList.togg
 // ═══ DATA: 국내 제안 준비 ═══
 // [#, 발주처, 사업명, 사업비, PM, 단계badge, 단계상세, 평가방식, 인력배정, 진행상황]
 const DOM=[
-[1,"산업단지공단","산단 엣지형 AIDC 실증 시범사업 사업관리 및 기술협약에 따른 성과물 관리용역","4.9","고경철","실공고","(2026.06.09 마감)","자체평가","김학동, 전은미","준비 중"],
-[2,"KORAIL","차세대 예약발매시스템 구축","32.0","황윤호","발주예정","6월 예정","조달평가","전은미,정옥영,김용효","준비 중"],
-[3,"KORAIL","KOVIS 시스템 고도화사업","34.0","최영성","발주예정","7월 예정","조달평가","권순열,정옥영,김용효","준비 중"]
+[1,"산업단지공단","산단 엣지형 AIDC 실증 시범사업 사업관리 및 기술협약에 따른 성과물 관리용역","4.9","고경철","실공고","접수마감 (2026.06.09)<br>제안평가 (2026.06.17)","자체평가","김학동, 전은미","준비 중"],
+[2,"한국조폐공사","차세대 ERP 시스템 구축 사업 PMO 용역","4.0","구경모","사전규격","6월 예정","조달평가","김명환, 이경민, 김재경","준비 중"],
+[3,"KORAIL","차세대 예약발매시스템 구축","32.0","황윤호","발주예정","6월 예정","조달평가","전은미,정옥영,김용효","준비 중"],
+[4,"KORAIL","KOVIS 시스템 고도화사업","34.0","이용근","발주예정","7월 예정","조달평가","권순열,정옥영,김용효","준비 중"]
 ];
 const dt=document.getElementById('domTbl');
 DOM.forEach(d=>{const stg_cls=d[5]==='실공고'?'cp-p':d[5]==='사전규격'?'cp-r':'cp-n';
@@ -937,14 +938,13 @@ dt.innerHTML+=`<tr${rowBg}><td>${d[0]}</td><td class="tp">${d[1]}</td><td style=
 // ═══ DATA: 국내 발주예정 ═══
 const DU=[
 [1,"한국산업은행","KDB Paperless 업무환경 구축 개발","5.3","6월 예정","미정",""],
-[2,"한국조폐공사","차세대 ERP 시스템 구축 사업 PMO 용역","4.0","6월 예정","미정",""],
-[3,"KORAIL","RAIL AI 허브 구축","13.8","7월 예정","미정","-"],
-[4,"한국사회보장정보원","돌봄 통합지원정보시스템 구축 PMO","7.1","7월 예정","유동화",""],
-[5,"안산시","강소형 스마트도시 PMO","5.0","7월 예정","이병성","김정환, 이병성"],
-[6,"태백시","강소형 스마트도시 조성사업 PMO","3.0","7월 예정","고경철","김정환, 이병성"],
-[7,"강원랜드","카지노시스템 구축 (CMS 2.0) PMO 용역","10.0","9월 예정","미정",""],
-[8,"경기주택도시공사","MIS 재구축 PMO 용역","11.8","10월 예정","미정",""],
-[9,"행정안전부","차세대 지방행정공통시스템 구축","70.0","27.1월 예정","미정",""]
+[2,"KORAIL","RAIL AI 허브 구축","13.8","7월 예정","미정","-"],
+[3,"한국사회보장정보원","돌봄 통합지원정보시스템 구축 PMO","7.1","7월 예정","유동화",""],
+[4,"안산시","강소형 스마트도시 PMO","5.0","7월 예정","이병성","김정환, 이병성"],
+[5,"태백시","강소형 스마트도시 조성사업 PMO","3.0","7월 예정","고경철","김정환, 이병성"],
+[6,"강원랜드","카지노시스템 구축 (CMS 2.0) PMO 용역","10.0","9월 예정","미정",""],
+[7,"경기주택도시공사","MIS 재구축 PMO 용역","11.8","10월 예정","미정",""],
+[8,"행정안전부","차세대 지방행정공통시스템 구축","70.0","27.1월 예정","미정",""]
 ];
 // 숨김 처리된 국방 사업 (필요 시 DU 배열에 추가)
 const DU_HIDDEN=[
