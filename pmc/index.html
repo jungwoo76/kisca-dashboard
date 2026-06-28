@@ -1945,10 +1945,10 @@ function goToKey(idx){
 <!-- ══════ 5. 해외 제안준비 ══════ -->
 <div class="pn" id="overseas">
   <div class="kpi-row">
-    <div class="kpi"><div class="kpi-top"><div class="kpi-ic i">🔄</div><div class="kpi-lb">제안 준비</div></div><div class="kpi-v" style="color:var(--ac)">0<span class="kpi-u">건</span></div></div>
+    <div class="kpi"><div class="kpi-top"><div class="kpi-ic i">🔄</div><div class="kpi-lb">제안 준비</div></div><div class="kpi-v" style="color:var(--ac)">1<span class="kpi-u">건</span></div></div>
     <div class="kpi"><div class="kpi-top"><div class="kpi-ic a">📅</div><div class="kpi-lb">발주예정</div></div><div class="kpi-v" style="color:var(--am)">11<span class="kpi-u">건</span></div></div>
   </div>
-  <div class="cd"><div class="cd-h"><h3>제안 준비</h3><span class="badge badge-i">0건</span></div>
+  <div class="cd"><div class="cd-h"><h3>제안 준비</h3><span class="badge badge-i">1건</span></div>
     <div class="sx"><table><thead><tr><th>#</th><th>발주처</th><th>사업명</th><th class="ar">사업비(억)</th><th>PM</th><th>단계</th><th>평가방식</th><th>인력배정</th></tr></thead>
     <tbody id="ovsKeyTbl"></tbody></table></div>
   </div>
@@ -2155,6 +2155,7 @@ DU.forEach(d=>{dut.innerHTML+=`<tr><td>${d[0]}</td><td class="tp">${d[1]}</td><t
 // ═══ DATA: 해외 제안 준비 ═══
 // [#, 발주처, 사업명, 사업비, PM, 단계badge, 단계상세, 평가방식, 인력배정, 진행상황]
 const OVS_KEY=[
+[1,"KOICA","라오스 지식재산서비스센터 구축 및 지재권관리 시스템 개선사업 PMC 용역","21.9","미정","사전공고","","조달평가","이도철, 안규태, 이상현","준비 중"]
 ];
 const okt=document.getElementById('ovsKeyTbl');
 OVS_KEY.forEach(d=>{const stg_cls=d[5]==='실공고'?'cp-p':d[5]==='사전규격'?'cp-r':'cp-n';
