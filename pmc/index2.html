@@ -208,7 +208,15 @@ html.js .reveal.show{opacity:1;transform:none}
       <tbody id="pipeTbl"></tbody>
     </table></div>
   </div>
-  <div class="note">⚠ <b>수주확률은 단계·경쟁상황을 반영한 가정치(시나리오)</b>입니다. 실제 영업 판단에 따라 조정이 필요하며, 본 전망은 의사결정 참고용입니다. 해외(KOICA) 파이프라인은 대부분 '27년 이후·초기단계로 본 전망에서 제외했습니다.</div>
+  <div class="note">⚠ <b>수주확률은 단계·경쟁상황을 반영한 가정치(시나리오)</b>입니다. 실제 영업 판단에 따라 조정이 필요하며, 본 전망은 의사결정 참고용입니다.</div>
+
+  <div class="card reveal" style="margin-top:18px"><div class="card-h"><h3>🌐 해외 파이프라인 & 수주확률(가정)</h3><span class="badge bd-b">KOICA 12건</span></div>
+    <div class="sx"><table>
+      <thead><tr><th>국가 (KOICA)</th><th>사업명</th><th class="ar">사업비(억)</th><th class="ac">수주확률<br>(가정)</th><th class="ar">가중기대(억)</th></tr></thead>
+      <tbody id="ovsPipeBody"></tbody>
+    </table></div>
+  </div>
+  <div class="note" style="background:var(--b2l);border-color:#bfdbfe;color:var(--b2)">🌐 해외(KOICA) 파이프라인은 대부분 <b>'27년 이후 착수·초기단계</b>로, 본 <b>2026 연간 전망(126.6억)에는 미반영</b>(국내 기준)인 중장기 참고용입니다.</div>
 </section>
 
 <!-- ════ 4. 수금·재무 ════ -->
@@ -487,6 +495,28 @@ function reveal(el){el.classList.add('show');el.querySelectorAll('[data-count]')
   PIPE.forEach(p=>{domW+=p[4]*p[5];domN+=p[4];ptb.innerHTML+=rowHtml(p);});
   ptb.innerHTML+=`<tr style="background:var(--s2)"><td colspan="3" class="tp fw">합계 (명목 ${domN.toFixed(1)}억)</td><td class="ar fw">${domN.toFixed(1)}</td><td class="ac">—</td><td class="ar fw" style="color:var(--ac);font-size:13px">${domW.toFixed(1)}</td></tr>`;
 
+  /* 3. 해외 파이프라인 — [국가,사업명,사업비,수주확률(가정)] */
+  const OVS=[
+    ["라오스","지식재산서비스센터 구축 및 지재권관리 시스템 개선사업 PMC",21.9,0.15],
+    ["라오스","국립 D-HRD센터 설립(공무원 디지털 역량강화) PMC",34.0,0.18],
+    ["필리핀","전자정부 K-DID(분산 신원인증) 시스템 구축 PMC",124.0,0.15],
+    ["필리핀","사법 정보 디지털화 및 역량강화 PMC",33.1,0.12],
+    ["콜롬비아","반부패 포털(PACO) 고도화 PMC",41.0,0.15],
+    ["에티오피아","무역활성화 통합 관세행정 시스템 구축 PMC",16.1,0.12],
+    ["베트남","감염병 감시정보시스템 구축 및 대응 역량강화 PMC",45.0,0.12],
+    ["우간다","감염병 예방 및 대응체계 강화 PMC",5.0,0.12],
+    ["도미니카","카리브해 해조류(모자반) 재해대응·관리 역량강화 PMC",70.6,0.10],
+    ["파라과이","소농의 지속가능한 기후변화 적응력 강화 PMC",124.0,0.10],
+    ["네팔","떠라이 지역 기후탄력적 벼품종 재배·쌀 증산 PMC",141.0,0.08],
+    ["인도네시아","한-인니 쌀혁신센터 설립·쌀 증산 PMC",132.0,0.08]];
+  const otb2=document.getElementById('ovsPipeBody');
+  if(otb2){let oN=0,oW=0;
+    OVS.forEach(p=>{const w=p[2]*p[3];oW+=w;oN+=p[2];const pc=Math.round(p[3]*100);
+      const cls=pc>=15?'pill-mid':'pill-lo';
+      otb2.innerHTML+=`<tr><td class="tp">KOICA · ${p[0]}</td><td style="max-width:300px">${p[1]}</td><td class="ar fw">${p[2].toFixed(1)}</td><td class="ac"><span class="pill ${cls}">${pc}%</span></td><td class="ar fw" style="color:var(--ac)">${w.toFixed(2)}</td></tr>`;});
+    otb2.innerHTML+=`<tr style="background:var(--s2)"><td colspan="2" class="tp fw">합계 (명목 ${oN.toFixed(1)}억)</td><td class="ar fw">${oN.toFixed(1)}</td><td class="ac">—</td><td class="ar fw" style="color:var(--ac);font-size:13px">${oW.toFixed(1)}</td></tr>`;
+  }
+
   /* 4. 수금 추이 (연말까지: 실적 1~6월 + 예정 7~12월) */
   new Chart($('cashChart'),{type:'line',data:{labels:m12,datasets:[
     {label:'수금 실적',data:[2.2,2.0,3.0,3.9,10.7,7.2,null,null,null,null,null,null],
@@ -505,7 +535,7 @@ function reveal(el){el.classList.add('show');el.querySelectorAll('[data-count]')
     scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'억'},grid:{color:'#eef1f6'}},x:{grid:{display:false}}}}});
 
   /* 4. 향후 수금 */
-  new Chart($('futureCash'),{type:'bar',data:{labels:["2026 하반기","2027","2028","2029"],datasets:[
+  new Chart($('futureCash'),{type:'bar',data:{labels:[["2026 하반기","(24.5억)"],["2027","(34.5억)"],["2028","(13.5억)"],["2029","(2.0억)"]],datasets:[
     {label:'국내',data:[21.1,24.4,6.4,0],backgroundColor:C.b2,borderRadius:5,stack:'y'},
     {label:'해외',data:[3.4,10.1,7.1,2.0],backgroundColor:C.cy,borderRadius:5,stack:'y'}
   ]},options:{responsive:true,maintainAspectRatio:false,
