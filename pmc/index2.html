@@ -210,13 +210,13 @@ html.js .reveal.show{opacity:1;transform:none}
   </div>
   <div class="note">⚠ <b>수주확률은 단계·경쟁상황을 반영한 가정치(시나리오)</b>입니다. 실제 영업 판단에 따라 조정이 필요하며, 본 전망은 의사결정 참고용입니다.</div>
 
-  <div class="card reveal" style="margin-top:18px"><div class="card-h"><h3>🌐 해외 파이프라인 & 수주확률(가정)</h3><span class="badge bd-b">KOICA 12건</span></div>
-    <div class="sx"><table>
-      <thead><tr><th>국가 (KOICA)</th><th>사업명</th><th class="ar">사업비(억)</th><th class="ac">수주확률<br>(가정)</th><th class="ar">가중기대(억)</th></tr></thead>
+  <div class="card reveal" style="margin-top:18px"><div class="card-h"><h3>🌐 해외 파이프라인 & 수주확률(가정)</h3><span class="badge bd-b">신규 KSP·ODA 11건</span></div>
+    <div class="sx"><table style="font-size:11px">
+      <thead><tr><th>사업구분</th><th>내역사업명</th><th class="ac">섹터</th><th class="ar">총사업예산<br>(억)</th><th class="ar">'26 PMC목표<br>(억)</th><th class="ac">수주확률<br>(가정)</th><th class="ar">가중기대<br>(억)</th></tr></thead>
       <tbody id="ovsPipeBody"></tbody>
     </table></div>
   </div>
-  <div class="note" style="background:var(--b2l);border-color:#bfdbfe;color:var(--b2)">🌐 해외(KOICA) 파이프라인은 대부분 <b>'27년 이후 착수·초기단계</b>로, 본 <b>2026 연간 전망(126.6억)에는 미반영</b>(국내 기준)인 중장기 참고용입니다.</div>
+  <div class="note" style="background:var(--b2l);border-color:#bfdbfe;color:var(--b2)">🌐 해외 파이프라인은 <b>신규 KSP·ODA 사업</b>으로, 대부분 <b>'26~'27년 발주 예정</b>입니다. 사업비는 PMC 수임분(2026 목표) 기준이며, 본 <b>2026 연간 전망(126.6억)에는 미반영</b>(국내 기준)인 참고용입니다. ※ 수주확률은 가정치.</div>
 </section>
 
 <!-- ════ 4. 수금·재무 ════ -->
@@ -495,26 +495,35 @@ function reveal(el){el.classList.add('show');el.querySelectorAll('[data-count]')
   PIPE.forEach(p=>{domW+=p[4]*p[5];domN+=p[4];ptb.innerHTML+=rowHtml(p);});
   ptb.innerHTML+=`<tr style="background:var(--s2)"><td colspan="3" class="tp fw">합계 (명목 ${domN.toFixed(1)}억)</td><td class="ar fw">${domN.toFixed(1)}</td><td class="ac">—</td><td class="ar fw" style="color:var(--ac);font-size:13px">${domW.toFixed(1)}</td></tr>`;
 
-  /* 3. 해외 파이프라인 — [국가,사업명,사업비,수주확률(가정)] */
+  /* 3. 해외 파이프라인 — [사업구분,내역사업명,섹터,총사업예산,'26 PMC목표,수주확률(가정)] */
   const OVS=[
-    ["라오스","지식재산서비스센터 구축 및 지재권관리 시스템 개선사업 PMC",21.9,0.15],
-    ["라오스","국립 D-HRD센터 설립(공무원 디지털 역량강화) PMC",34.0,0.18],
-    ["필리핀","전자정부 K-DID(분산 신원인증) 시스템 구축 PMC",124.0,0.15],
-    ["필리핀","사법 정보 디지털화 및 역량강화 PMC",33.1,0.12],
-    ["콜롬비아","반부패 포털(PACO) 고도화 PMC",41.0,0.15],
-    ["에티오피아","무역활성화 통합 관세행정 시스템 구축 PMC",16.1,0.12],
-    ["베트남","감염병 감시정보시스템 구축 및 대응 역량강화 PMC",45.0,0.12],
-    ["우간다","감염병 예방 및 대응체계 강화 PMC",5.0,0.12],
-    ["도미니카","카리브해 해조류(모자반) 재해대응·관리 역량강화 PMC",70.6,0.10],
-    ["파라과이","소농의 지속가능한 기후변화 적응력 강화 PMC",124.0,0.10],
-    ["네팔","떠라이 지역 기후탄력적 벼품종 재배·쌀 증산 PMC",141.0,0.08],
-    ["인도네시아","한-인니 쌀혁신센터 설립·쌀 증산 PMC",132.0,0.08]];
+    ["경제발전공유사업(KSP)","KSP-IDB 자메이카 지리정보 및 도로정보 데이터베이스","공공행정",5.40,3.78,0.25],
+    ["경제발전공유사업(KSP)","페루 대외무역 물류망 보안 강화 로드맵","공공행정",5.21,3.65,0.20],
+    ["필리핀(ODA)","필리핀 사법 정보 디지털화 및 역량강화 사업 ('26-31/1,450만불)","공공행정",200.10,2.90,0.20],
+    ["방글라데시(ODA)","방글라데시 AI 혁신기술 전문인력 양성사업 ('26-29/1,300만불)","교육",179.40,25.00,0.15],
+    ["가나(ODA)","가나 디지털 기초교육 역량강화 프로그램 ('26-32/2,800만불)","교육",386.40,30.00,0.15],
+    ["이집트(ODA)","이집트 지식재산 행정 통합 플랫폼 구축사업 ('26-31/850만불)","공공행정",117.30,25.00,0.15],
+    ["페루(ODA)","페루 외교부 영사서비스 디지털화 사업 ('26-31/1,200만불)","공공행정",165.60,25.00,0.15],
+    ["개도국 관세행정 현대화 지원(ODA)","모리셔스 위험관리시스템 및 DW 구축 사업","공공행정",59.86,25.00,0.15],
+    ["전자정부 국가간협력 강화(ODA)","디지털정부 협력센터 운영 (조지아 디지털정부포털 활성화)","디지털협력",17.80,5.73,0.25],
+    ["재난안전 신기술 해외보급(ODA)","필리핀 세부주 재난위험경감 조기경보 체계 구축","재난관리",62.74,13.85,0.15],
+    ["개도국정보이용 환경개선(ODA)","개도국정보접근 센터 구축·운영 (스리랑카 신규구축)","디지털협력",7.80,6.84,0.25]];
   const otb2=document.getElementById('ovsPipeBody');
-  if(otb2){let oN=0,oW=0;
-    OVS.forEach(p=>{const w=p[2]*p[3];oW+=w;oN+=p[2];const pc=Math.round(p[3]*100);
-      const cls=pc>=15?'pill-mid':'pill-lo';
-      otb2.innerHTML+=`<tr><td class="tp">KOICA · ${p[0]}</td><td style="max-width:300px">${p[1]}</td><td class="ar fw">${p[2].toFixed(1)}</td><td class="ac"><span class="pill ${cls}">${pc}%</span></td><td class="ar fw" style="color:var(--ac)">${w.toFixed(2)}</td></tr>`;});
-    otb2.innerHTML+=`<tr style="background:var(--s2)"><td colspan="2" class="tp fw">합계 (명목 ${oN.toFixed(1)}억)</td><td class="ar fw">${oN.toFixed(1)}</td><td class="ac">—</td><td class="ar fw" style="color:var(--ac);font-size:13px">${oW.toFixed(1)}</td></tr>`;
+  if(otb2){
+    const grp=(t,c)=>`<tr><td colspan="7" style="background:${c};font-weight:800;font-size:11px;padding:7px 12px">${t}</td></tr>`;
+    const row=(p)=>{const w=p[4]*p[5];const pc=Math.round(p[5]*100);const cls=pc>=25?'pill-mid':'pill-lo';
+      return `<tr><td class="tp" style="font-size:10px;white-space:nowrap">${p[0]}</td><td style="max-width:260px">${p[1]}</td><td class="ac" style="font-size:10px">${p[2]}</td><td class="ar">${p[3].toFixed(1)}</td><td class="ar fw">${p[4].toFixed(2)}</td><td class="ac"><span class="pill ${cls}">${pc}%</span></td><td class="ar fw" style="color:var(--ac)">${w.toFixed(2)}</td></tr>`;};
+    const sub=(label,arr)=>{let B=0,P=0,W=0;arr.forEach(p=>{B+=p[3];P+=p[4];W+=p[4]*p[5];});
+      return `<tr style="background:var(--s2)"><td colspan="3" class="tp fw">${label}</td><td class="ar fw">${B.toFixed(1)}</td><td class="ar fw">${P.toFixed(2)}</td><td class="ac">—</td><td class="ar fw" style="color:var(--ac)">${W.toFixed(1)}</td></tr>`;};
+    const koica=OVS.filter(p=>!p[0].includes('KSP')), ksp=OVS.filter(p=>p[0].includes('KSP'));
+    let html='';
+    html+=grp('🔵 KOICA (ODA) · '+koica.length+'건','rgba(37,99,235,.10)');
+    koica.forEach(p=>html+=row(p)); html+=sub('KOICA 소계',koica);
+    html+=grp('🟣 KSP (경제발전공유사업) · '+ksp.length+'건','rgba(99,91,255,.10)');
+    ksp.forEach(p=>html+=row(p)); html+=sub('KSP 소계',ksp);
+    let B=0,P=0,W=0;OVS.forEach(p=>{B+=p[3];P+=p[4];W+=p[4]*p[5];});
+    html+=`<tr style="background:rgba(99,91,255,.10)"><td colspan="3" class="tp fw">전체 합계 (11건)</td><td class="ar fw">${B.toFixed(1)}</td><td class="ar fw">${P.toFixed(2)}</td><td class="ac">—</td><td class="ar fw" style="color:var(--ac);font-size:13px">${W.toFixed(1)}</td></tr>`;
+    otb2.innerHTML=html;
   }
 
   /* 4. 수금 추이 (연말까지: 실적 1~6월 + 예정 7~12월) */
