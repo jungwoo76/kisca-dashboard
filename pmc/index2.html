@@ -210,7 +210,7 @@ html.js .reveal.show{opacity:1;transform:none}
   </div>
   <div class="note">⚠ <b>수주확률은 단계·경쟁상황을 반영한 가정치(시나리오)</b>입니다. 실제 영업 판단에 따라 조정이 필요하며, 본 전망은 의사결정 참고용입니다.</div>
 
-  <div class="card reveal" style="margin-top:18px"><div class="card-h"><h3>🌐 해외 파이프라인 & 수주확률(가정)</h3><span class="badge bd-b">신규 KSP·ODA 11건</span></div>
+  <div class="card reveal" style="margin-top:18px"><div class="card-h"><h3>🌐 해외 파이프라인 & 수주확률(가정)</h3><span class="badge bd-b">신규 KSP·ODA 12건</span></div>
     <div class="sx"><table style="font-size:11px">
       <thead><tr><th>사업구분</th><th>내역사업명</th><th class="ac">섹터</th><th class="ar">총사업예산<br>(억)</th><th class="ar">'26 PMC목표<br>(억)</th><th class="ac">수주확률<br>(가정)</th><th class="ar">가중기대<br>(억)</th></tr></thead>
       <tbody id="ovsPipeBody"></tbody>
@@ -499,6 +499,7 @@ function reveal(el){el.classList.add('show');el.querySelectorAll('[data-count]')
   const OVS=[
     ["경제발전공유사업(KSP)","KSP-IDB 자메이카 지리정보 및 도로정보 데이터베이스","공공행정",5.40,3.78,0.25],
     ["경제발전공유사업(KSP)","페루 대외무역 물류망 보안 강화 로드맵","공공행정",5.21,3.65,0.20],
+    ["라오스(ODA)","라오스 지식재산서비스센터 구축 및 지재권관리 시스템 개선사업 PMC 용역","공공행정",21.9,21.9,0.30,"사전공고 · 조달평가 · 이도철·안규태·이상현"],
     ["필리핀(ODA)","필리핀 사법 정보 디지털화 및 역량강화 사업 ('26-31/1,450만불)","공공행정",200.10,2.90,0.20],
     ["방글라데시(ODA)","방글라데시 AI 혁신기술 전문인력 양성사업 ('26-29/1,300만불)","교육",179.40,25.00,0.15],
     ["가나(ODA)","가나 디지털 기초교육 역량강화 프로그램 ('26-32/2,800만불)","교육",386.40,30.00,0.15],
@@ -512,7 +513,8 @@ function reveal(el){el.classList.add('show');el.querySelectorAll('[data-count]')
   if(otb2){
     const grp=(t,c)=>`<tr><td colspan="7" style="background:${c};font-weight:800;font-size:11px;padding:7px 12px">${t}</td></tr>`;
     const row=(p)=>{const w=p[4]*p[5];const pc=Math.round(p[5]*100);const cls=pc>=25?'pill-mid':'pill-lo';
-      return `<tr><td class="tp" style="font-size:10px;white-space:nowrap">${p[0]}</td><td style="max-width:260px">${p[1]}</td><td class="ac" style="font-size:10px">${p[2]}</td><td class="ar">${p[3].toFixed(1)}</td><td class="ar fw">${p[4].toFixed(2)}</td><td class="ac"><span class="pill ${cls}">${pc}%</span></td><td class="ar fw" style="color:var(--ac)">${w.toFixed(2)}</td></tr>`;};
+      const note=p[6]?`<br><span style="font-size:9px;color:var(--td)">📌 ${p[6]}</span>`:'';
+      return `<tr><td class="tp" style="font-size:10px;white-space:nowrap">${p[0]}</td><td style="max-width:260px">${p[1]}${note}</td><td class="ac" style="font-size:10px">${p[2]}</td><td class="ar">${p[3].toFixed(1)}</td><td class="ar fw">${p[4].toFixed(2)}</td><td class="ac"><span class="pill ${cls}">${pc}%</span></td><td class="ar fw" style="color:var(--ac)">${w.toFixed(2)}</td></tr>`;};
     const sub=(label,arr)=>{let B=0,P=0,W=0;arr.forEach(p=>{B+=p[3];P+=p[4];W+=p[4]*p[5];});
       return `<tr style="background:var(--s2)"><td colspan="3" class="tp fw">${label}</td><td class="ar fw">${B.toFixed(1)}</td><td class="ar fw">${P.toFixed(2)}</td><td class="ac">—</td><td class="ar fw" style="color:var(--ac)">${W.toFixed(1)}</td></tr>`;};
     const koica=OVS.filter(p=>!p[0].includes('KSP')), ksp=OVS.filter(p=>p[0].includes('KSP'));
@@ -522,7 +524,7 @@ function reveal(el){el.classList.add('show');el.querySelectorAll('[data-count]')
     html+=grp('🟣 KSP (경제발전공유사업) · '+ksp.length+'건','rgba(99,91,255,.10)');
     ksp.forEach(p=>html+=row(p)); html+=sub('KSP 소계',ksp);
     let B=0,P=0,W=0;OVS.forEach(p=>{B+=p[3];P+=p[4];W+=p[4]*p[5];});
-    html+=`<tr style="background:rgba(99,91,255,.10)"><td colspan="3" class="tp fw">전체 합계 (11건)</td><td class="ar fw">${B.toFixed(1)}</td><td class="ar fw">${P.toFixed(2)}</td><td class="ac">—</td><td class="ar fw" style="color:var(--ac);font-size:13px">${W.toFixed(1)}</td></tr>`;
+    html+=`<tr style="background:rgba(99,91,255,.10)"><td colspan="3" class="tp fw">전체 합계 (${OVS.length}건)</td><td class="ar fw">${B.toFixed(1)}</td><td class="ar fw">${P.toFixed(2)}</td><td class="ac">—</td><td class="ar fw" style="color:var(--ac);font-size:13px">${W.toFixed(1)}</td></tr>`;
     otb2.innerHTML=html;
   }
 
